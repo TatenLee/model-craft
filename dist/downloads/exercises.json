@@ -1,0 +1,346 @@
+[
+  {
+    "id": "gradient-step",
+    "title": "一次梯度更新究竟改变了什么",
+    "week": 1,
+    "minutes": 30,
+    "level": "实现",
+    "summary": "不用自动求导，亲自算一次线性模型的平均平方误差与参数更新。",
+    "instructions": [
+      "实现 gradient_step(w, b, xs, ys, lr)，模型为 prediction = w * x + b。",
+      "返回 (new_w, new_b, loss)。loss 是更新前所有样本的平均平方误差；两个参数必须用同一份旧参数计算梯度。",
+      "输入序列长度相同且非空；lr 不能为负。不满足条件时抛出 ValueError。"
+    ],
+    "starter": "def gradient_step(w, b, xs, ys, lr):\n    # 先用旧参数计算所有误差，再更新两个参数。\n    raise NotImplementedError(\"计算 loss、dw、db 并返回新参数\")\n",
+    "solution": "def gradient_step(w, b, xs, ys, lr):\n    if not xs or len(xs) != len(ys) or lr < 0:\n        raise ValueError(\"需要等长非空数据和非负学习率\")\n    errors = [w * x + b - y for x, y in zip(xs, ys)]\n    n = len(xs)\n    loss = sum(e * e for e in errors) / n\n    dw = 2 * sum(e * x for e, x in zip(errors, xs)) / n\n    db = 2 * sum(errors) / n\n    return w - lr * dw, b - lr * db, loss\n",
+    "tests": [
+      {
+        "name": "一个可手算的 batch",
+        "code": "w,b,loss = gradient_step(0,0,[0,1],[1,3],0.1)\nassert abs(w-0.3)<1e-10 and abs(b-0.4)<1e-10 and abs(loss-5)<1e-10"
+      },
+      {
+        "name": "零误差不应更新",
+        "code": "assert gradient_step(2,1,[0,1,2],[1,3,5],0.5) == (2,1,0)"
+      },
+      {
+        "name": "学习率为零仍报告真实误差",
+        "code": "w,b,loss=gradient_step(1,0,[2],[5],0)\nassert w==1 and b==0 and loss==9"
+      },
+      {
+        "name": "重复样本不改变平均梯度",
+        "code": "a=gradient_step(0,0,[1],[2],0.1)\nb=gradient_step(0,0,[1,1,1],[2,2,2],0.1)\nassert all(abs(x-y)<1e-10 for x,y in zip(a,b))"
+      },
+      {
+        "name": "输入检查",
+        "code": "try:\n    gradient_step(0,0,[],[],0.1)\n    assert False, \"空 batch 应报错\"\nexcept ValueError:\n    pass"
+      }
+    ],
+    "hints": [
+      "先定义每个样本的误差 e = w*x + b - y。",
+      "MSE 对 w 的导数是 2*mean(e*x)，对 b 的导数是 2*mean(e)。",
+      "先保存 dw 和 db，再同时使用旧 w、b 做减法。"
+    ],
+    "explanation": "更新的是权重数值，模型参数量没有变化。loss 是更新前的诊断量。小学习率下沿负梯度走通常能降低局部损失，但一次下降不证明验证集表现变好。"
+  },
+  {
+    "id": "causal-mask",
+    "title": "让模型看不到未来",
+    "week": 2,
+    "minutes": 30,
+    "level": "实现",
+    "summary": "构造布尔因果遮罩，分清未来位置和补齐位置。",
+    "instructions": [
+      "实现 causal_mask(length, valid_length=None)，返回 length×length 的 Python 二维列表。",
+      "遵循 torch.nn.Transformer 的布尔约定：True 表示禁止访问。查询 i 不可看见 j>i 的未来 key，也不可看见 j>=valid_length 的补齐 key。",
+      "valid_length 默认等于 length；允许 length=0。补齐查询行的输出应由调用者忽略，本函数只遮蔽 key。非法长度抛出 ValueError。"
+    ],
+    "starter": "def causal_mask(length, valid_length=None):\n    raise NotImplementedError(\"逐行判断 key 是否位于未来或补齐区域\")\n",
+    "solution": "def causal_mask(length, valid_length=None):\n    if valid_length is None:\n        valid_length = length\n    if length < 0 or not 0 <= valid_length <= length:\n        raise ValueError(\"非法序列长度\")\n    return [[j > i or j >= valid_length for j in range(length)]\n            for i in range(length)]\n",
+    "tests": [
+      {
+        "name": "三步因果关系",
+        "code": "assert causal_mask(3) == [[False,True,True],[False,False,True],[False,False,False]]"
+      },
+      {
+        "name": "补齐 key 始终被遮蔽",
+        "code": "m=causal_mask(4,2)\nassert m[1] == [False,False,True,True]\nassert m[3] == [False,False,True,True]"
+      },
+      {
+        "name": "空序列与全补齐",
+        "code": "assert causal_mask(0)==[]\nassert causal_mask(2,0)==[[True,True],[True,True]]"
+      },
+      {
+        "name": "返回值确实是布尔",
+        "code": "assert all(type(v) is bool for row in causal_mask(3,2) for v in row)"
+      },
+      {
+        "name": "拒绝超出长度的有效位置",
+        "code": "try:\n    causal_mask(2,3)\n    assert False\nexcept ValueError:\n    pass"
+      }
+    ],
+    "hints": [
+      "第 i 行代表第 i 个位置能够访问哪些 key。",
+      "禁止未来位置：j > i；禁止补齐位置：j >= valid_length。",
+      "两个禁止条件用 or 连接。不要用浮点 0/1 代替布尔遮罩。"
+    ],
+    "explanation": "因果掩码避免预测时偷看答案。浮点 attention mask 的语义是加到分数上，不能把 0/1 当作布尔屏蔽。真实 attention 要特别处理全补齐样本，避免全屏蔽行产生 NaN；不同 API 的布尔约定也可能不同。"
+  },
+  {
+    "id": "stable-cross-entropy",
+    "title": "稳定地计算交叉熵",
+    "week": 3,
+    "minutes": 45,
+    "level": "实现",
+    "summary": "极大 logits 也不溢出，理解模型实际优化的分类损失。",
+    "instructions": [
+      "实现 cross_entropy(logits, target)，返回单个样本的交叉熵，使用自然对数。",
+      "logits 是非空、有限浮点数列表；target 是合法类别下标。非法输入抛出 ValueError。",
+      "使用平移不变性或 log-sum-exp；不要先对很大的 logit 直接求 exp。"
+    ],
+    "starter": "import math\n\ndef cross_entropy(logits, target):\n    raise NotImplementedError(\"稳定计算 logsumexp(logits) - logits[target]\")\n",
+    "solution": "import math\n\ndef cross_entropy(logits, target):\n    if not logits or not 0 <= target < len(logits):\n        raise ValueError(\"空输入或非法标签\")\n    if not all(math.isfinite(v) for v in logits):\n        raise ValueError(\"logits 必须有限\")\n    m = max(logits)\n    return math.log(sum(math.exp(v-m) for v in logits)) + (m-logits[target])\n",
+    "tests": [
+      {
+        "name": "均匀概率的损失",
+        "code": "import math\nassert abs(cross_entropy([0,0],1)-math.log(2))<1e-10"
+      },
+      {
+        "name": "极大差距仍然有限",
+        "code": "import math\nassert cross_entropy([1000,-1000],0) < 1e-10\nassert abs(cross_entropy([1000,-1000],1)-2000)<1e-8"
+      },
+      {
+        "name": "共同平移不改变结果",
+        "code": "a=cross_entropy([1,2,3],1)\nb=cross_entropy([10001,10002,10003],1)\nassert abs(a-b)<1e-9"
+      },
+      {
+        "name": "正确类别概率增加时损失下降",
+        "code": "assert cross_entropy([0,5],1) < cross_entropy([0,1],1)"
+      },
+      {
+        "name": "拒绝非法类别",
+        "code": "try:\n    cross_entropy([1,2],2)\n    assert False\nexcept ValueError:\n    pass"
+      }
+    ],
+    "hints": [
+      "交叉熵可以写为 log(sum(exp(logits))) - logits[target]。",
+      "把每个 logit 减去最大值，指数项就不会因为正数太大而溢出。",
+      "最后用 m-logits[target]，避免先形成两个巨大数再相减。"
+    ],
+    "explanation": "交叉熵关心正确答案获得的概率，不只关心 argmax 是否正确。它和准确率可能变化不同。实际训练还必须正确处理 PAD 和监督位置的归一化。"
+  },
+  {
+    "id": "weighted-accumulation",
+    "title": "累积梯度时应该怎样平均",
+    "week": 4,
+    "minutes": 30,
+    "level": "实现",
+    "summary": "不同数据块的有效 token 数不同，简单平均可能改变训练目标。",
+    "instructions": [
+      "实现 weighted_gradient(chunks)。每项是 (该块平均梯度, 有效监督数量)，返回按有效监督数量加权的全局平均梯度。",
+      "有效数量为零的块不贡献任何权重；不修改传入数据。",
+      "不允许负权重，总有效数量必须大于零，否则抛出 ValueError。此题是标量梯度示例。"
+    ],
+    "starter": "def weighted_gradient(chunks):\n    raise NotImplementedError(\"先恢复梯度和，再按总有效数量归一化\")\n",
+    "solution": "def weighted_gradient(chunks):\n    if any(count < 0 for _, count in chunks):\n        raise ValueError(\"有效数量不能为负\")\n    total = sum(count for _, count in chunks)\n    if total <= 0:\n        raise ValueError(\"没有有效监督\")\n    return sum(grad * count for grad, count in chunks if count > 0) / total\n",
+    "tests": [
+      {
+        "name": "不等长数据块",
+        "code": "assert abs(weighted_gradient([(2,1),(10,3)])-8)<1e-10"
+      },
+      {
+        "name": "零监督块不影响结果",
+        "code": "assert weighted_gradient([(1000,0),(-2,4)]) == -2"
+      },
+      {
+        "name": "切块方式不改变目标",
+        "code": "a=weighted_gradient([(3,10),(7,2)])\nb=weighted_gradient([(3,4),(3,6),(7,1),(7,1)])\nassert abs(a-b)<1e-10"
+      },
+      {
+        "name": "空监督明确报错",
+        "code": "try:\n    weighted_gradient([(2,0)])\n    assert False\nexcept ValueError:\n    pass"
+      },
+      {
+        "name": "拒绝负数量",
+        "code": "try:\n    weighted_gradient([(2,-1),(3,2)])\n    assert False\nexcept ValueError:\n    pass"
+      }
+    ],
+    "hints": [
+      "每个块的平均梯度乘以有效数量，得到该块梯度和。",
+      "分母应是有效数量的总和，而不是块的数量。",
+      "当总监督为零时，应明确跳过更新或报错；不能伪造分母。"
+    ],
+    "explanation": "若训练目标按 token 平均，必须按有效 token 数加权。按样本或按 lane 平均也是可以定义的其他目标，但不能把不同归一化口径当作同一个实验。"
+  },
+  {
+    "id": "lora-update",
+    "title": "亲手构造 LoRA 更新",
+    "week": 5,
+    "minutes": 45,
+    "level": "实现",
+    "summary": "用二维列表计算低秩增量，分清训练方法与参数更新方式。",
+    "instructions": [
+      "实现 lora_update(W, A, B, alpha)，返回 W + (alpha/r) * B*A。W 是 m×n，A 是 r×n，B 是 m×r。",
+      "所有输入都是非空矩形二维列表；形状不兼容时抛出 ValueError。不要修改任何输入。",
+      "本题演示合并权重的数值关系；完整 LoRA 训练还需要冻结 W，并只为指定参数构建优化器。"
+    ],
+    "starter": "def lora_update(W, A, B, alpha):\n    raise NotImplementedError(\"先核对形状，再计算低秩增量\")\n",
+    "solution": "def lora_update(W, A, B, alpha):\n    def shape(matrix):\n        if not matrix or not matrix[0] or any(len(row) != len(matrix[0]) for row in matrix):\n            raise ValueError(\"需要非空矩形矩阵\")\n        return len(matrix), len(matrix[0])\n    m,n = shape(W)\n    r,an = shape(A)\n    bm,br = shape(B)\n    if an != n or bm != m or br != r:\n        raise ValueError(\"矩阵形状不匹配\")\n    return [[W[i][j] + alpha/r * sum(B[i][k]*A[k][j] for k in range(r))\n             for j in range(n)] for i in range(m)]\n",
+    "tests": [
+      {
+        "name": "秩为一的明确更新",
+        "code": "assert lora_update([[1,0,0],[0,1,0]],[[1,2,0]],[[3],[4]],2)==[[7,12,0],[8,17,0]]"
+      },
+      {
+        "name": "alpha 按 rank 缩放",
+        "code": "assert lora_update([[0,0],[0,0]],[[1,0],[0,1]],[[1,0],[0,1]],2)==[[1,0],[0,1]]"
+      },
+      {
+        "name": "零 B 不改变权重",
+        "code": "W=[[1,2],[3,4]]\nassert lora_update(W,[[2,3]],[[0],[0]],8)==W"
+      },
+      {
+        "name": "原矩阵不被修改",
+        "code": "W=[[1,2]]; A=[[1,0]]; B=[[2]]\nlora_update(W,A,B,1)\nassert W==[[1,2]] and A==[[1,0]] and B==[[2]]"
+      },
+      {
+        "name": "不兼容形状报错",
+        "code": "try:\n    lora_update([[1,2]],[[1]],[[1]],1)\n    assert False\nexcept ValueError:\n    pass"
+      }
+    ],
+    "hints": [
+      "先写清 m、n、r。B*A 的结果必须与 W 同形状。",
+      "第 i,j 个增量是 sum(B[i][k]*A[k][j])。",
+      "LoRA 的 scale 是 alpha/r；少更新参数不等于不计算基础模型。"
+    ],
+    "explanation": "LoRA 是参数更新方式，可以用于 SFT 等训练任务。秩改变可训练参数量与表达约束，效果要由留出集和资源记录判断；rank 不是越大就一定越好。"
+  },
+  {
+    "id": "episode-split",
+    "title": "按轨迹切分，避免时间泄漏",
+    "week": 8,
+    "minutes": 45,
+    "level": "实现",
+    "summary": "同一段轨迹的相邻帧不能随机散落到训练集和验证集。",
+    "instructions": [
+      "实现 split_episodes(records, train_fraction=0.8)，返回 (train_records, validation_records)。每条记录含 episode、time 两个字段，time 为全局时间戳。",
+      "按每个 episode 的最早 time 排序，时间相同按 str(episode) 排序；前 floor(N*train_fraction) 个 episode 用于训练。将数量限制在 1 到 N-1。",
+      "各输出按 (time, str(episode)) 排序；同一 episode 必须全部属于一侧；不修改输入。至少两个 episode，比例在 (0,1)，否则 ValueError。"
+    ],
+    "starter": "def split_episodes(records, train_fraction=0.8):\n    raise NotImplementedError(\"先确定整条 episode 的归属，再分配其中的记录\")\n",
+    "solution": "def split_episodes(records, train_fraction=0.8):\n    if not 0 < train_fraction < 1:\n        raise ValueError(\"比例必须位于 0 与 1 之间\")\n    starts = {}\n    for row in records:\n        episode = row[\"episode\"]\n        starts[episode] = min(starts.get(episode, row[\"time\"]), row[\"time\"])\n    if len(starts) < 2:\n        raise ValueError(\"至少需要两个独立 episode\")\n    ordered = sorted(starts, key=lambda ep: (starts[ep], str(ep)))\n    cut = max(1, min(len(ordered)-1, int(len(ordered)*train_fraction)))\n    train_ids = set(ordered[:cut])\n    key = lambda row: (row[\"time\"], str(row[\"episode\"]))\n    train = sorted([row for row in records if row[\"episode\"] in train_ids], key=key)\n    valid = sorted([row for row in records if row[\"episode\"] not in train_ids], key=key)\n    return train, valid\n",
+    "tests": [
+      {
+        "name": "按 episode 起始时间划分",
+        "code": "rows=[{\"episode\":\"late\",\"time\":20},{\"episode\":\"early\",\"time\":1},{\"episode\":\"early\",\"time\":9},{\"episode\":\"late\",\"time\":21}]\na,b=split_episodes(rows,0.5)\nassert [r[\"time\"] for r in a]==[1,9] and [r[\"time\"] for r in b]==[20,21]"
+      },
+      {
+        "name": "同轨迹交错时间也不拆分",
+        "code": "rows=[{\"episode\":\"a\",\"time\":0},{\"episode\":\"b\",\"time\":2},{\"episode\":\"a\",\"time\":5},{\"episode\":\"c\",\"time\":8}]\na,b=split_episodes(rows,0.5)\nassert {r[\"episode\"] for r in a}=={\"a\"}\nassert not ({r[\"episode\"] for r in a} & {r[\"episode\"] for r in b})\nassert len(a)+len(b)==len(rows)"
+      },
+      {
+        "name": "两边非空且输入保持原样",
+        "code": "rows=[{\"episode\":\"b\",\"time\":2},{\"episode\":\"a\",\"time\":1}]\noriginal=list(rows)\na,b=split_episodes(rows,0.99)\nassert a and b and rows==original"
+      },
+      {
+        "name": "单轨迹不能宣称独立验证",
+        "code": "try:\n    split_episodes([{\"episode\":\"a\",\"time\":0}])\n    assert False\nexcept ValueError:\n    pass"
+      },
+      {
+        "name": "相同起始时间稳定排序",
+        "code": "rows=[{\"episode\":\"b\",\"time\":0},{\"episode\":\"a\",\"time\":0}]\na,b=split_episodes(rows,0.5)\nassert a[0][\"episode\"]==\"a\" and b[0][\"episode\"]==\"b\""
+      }
+    ],
+    "hints": [
+      "先建立 episode → 最早时间 的字典。",
+      "划分的是 episode ID 集合，而不是帧的下标。",
+      "再按 ID 集合过滤原记录，并检查两侧 episode 集合没有交集。"
+    ],
+    "explanation": "按轨迹划分减少相邻帧泄漏，但还不足以证明对新场景或新物体泛化。真实评测应根据问题继续按场景、物体、任务或采集日期分组；训练集拟合的归一化统计也不能偷用验证数据。"
+  },
+  {
+    "id": "memory-boundary",
+    "title": "记忆仍在，梯度历史可以截断",
+    "week": 9,
+    "minutes": 45,
+    "level": "实现",
+    "summary": "用一个极小状态机区分 reset 和 detach 的效果。",
+    "instructions": [
+      "实现 scan_memory(values, resets, detaches, decay=0.5)，每一步 state = decay*state + value。初始 state=0。",
+      "在更新之前，reset=True 将 state 和 history_length 都清零；detach=True 只将 history_length 清零，保留 state。每次更新后 history_length 加一。",
+      "返回每步 (state, history_length) 的列表。history_length 只是计算图历史长度的教学计数，不是实际梯度。三个列表等长、0<=decay<=1，否则 ValueError。"
+    ],
+    "starter": "def scan_memory(values, resets, detaches, decay=0.5):\n    raise NotImplementedError(\"分别维护状态数值和历史长度\")\n",
+    "solution": "def scan_memory(values, resets, detaches, decay=0.5):\n    if len(values)!=len(resets) or len(values)!=len(detaches) or not 0<=decay<=1:\n        raise ValueError(\"长度或 decay 不合法\")\n    state = 0.0\n    history = 0\n    outputs = []\n    for value, reset, detach in zip(values, resets, detaches):\n        if reset:\n            state, history = 0.0, 0\n        if detach:\n            history = 0\n        state = decay*state + value\n        history += 1\n        outputs.append((state, history))\n    return outputs\n",
+    "tests": [
+      {
+        "name": "detach 保留记忆数值",
+        "code": "assert scan_memory([2,0,0],[False]*3,[False,True,False]) == [(2,1),(1,1),(0.5,2)]"
+      },
+      {
+        "name": "reset 清空旧 episode 的记忆",
+        "code": "assert scan_memory([2,3],[False,True],[False,False]) == [(2,1),(3,1)]"
+      },
+      {
+        "name": "连续历史与截断有不同计数",
+        "code": "assert scan_memory([1,1,1],[False]*3,[False]*3,1)==[(1,1),(2,2),(3,3)]"
+      },
+      {
+        "name": "空序列与同时 reset/detach",
+        "code": "assert scan_memory([],[],[])==[]\nassert scan_memory([4,2],[False,True],[False,True],1)==[(4,1),(2,1)]"
+      },
+      {
+        "name": "拒绝不匹配长度",
+        "code": "try:\n    scan_memory([1],[],[False])\n    assert False\nexcept ValueError:\n    pass"
+      }
+    ],
+    "hints": [
+      "state 表示递归记忆的数值；history 表示本次梯度可追溯的操作计数。",
+      "detach 切断历史，并不把 state 变成零。",
+      "按 reset → detach → 更新 → 记录 的顺序实现。"
+    ],
+    "explanation": "真实 PyTorch 中 detach 返回不再连接旧计算图的张量，但保留数值。TBPTT 可用这种方式在有限反向传播窗口下保留跨块记忆。新的逻辑序列则通常需要 reset，避免不同轨迹之间泄漏。"
+  },
+  {
+    "id": "rollout-error",
+    "title": "测量连续预测的误差积累",
+    "week": 10,
+    "minutes": 45,
+    "level": "实现",
+    "summary": "让模型使用自己的预测继续向前走，测量真正的多步预测。",
+    "instructions": [
+      "实现 evaluate_rollout(initial, actions, targets, predictor)。state 与 action 都为二维数值，predictor(state, action) 返回下一个二维状态。",
+      "每步必须把上一步预测反馈给 predictor，不得把 targets 作为下一步输入。每步 MSE 是两个坐标平方误差的平均。",
+      "返回 {\"predictions\": [...], \"mse_by_step\": [...], \"mean_mse\": ...}；无动作时 mean_mse=0；actions 与 targets 长度不同或状态不是二维时抛出 ValueError。"
+    ],
+    "starter": "def evaluate_rollout(initial, actions, targets, predictor):\n    raise NotImplementedError(\"将预测状态持续反馈，并按预测长度记录误差\")\n",
+    "solution": "def evaluate_rollout(initial, actions, targets, predictor):\n    if len(initial)!=2 or len(actions)!=len(targets):\n        raise ValueError(\"状态维度或序列长度错误\")\n    state = tuple(initial)\n    predictions, errors = [], []\n    for action, target in zip(actions, targets):\n        if len(action)!=2 or len(target)!=2:\n            raise ValueError(\"需要二维动作与状态\")\n        state = tuple(predictor(state, action))\n        if len(state)!=2:\n            raise ValueError(\"预测必须是二维状态\")\n        predictions.append(state)\n        errors.append(sum((state[i]-target[i])**2 for i in range(2))/2)\n    return {\"predictions\": predictions, \"mse_by_step\": errors,\n            \"mean_mse\": sum(errors)/len(errors) if errors else 0.0}\n",
+    "tests": [
+      {
+        "name": "准确动态模型零误差",
+        "code": "f=lambda s,a:(s[0]+a[0],s[1]+a[1])\nr=evaluate_rollout((0,0),[(1,0),(0,2)],[(1,0),(1,2)],f)\nassert r[\"mean_mse\"]==0 and r[\"predictions\"]==[(1,0),(1,2)]"
+      },
+      {
+        "name": "偏差在连续预测中累积",
+        "code": "f=lambda s,a:(s[0]+0.5*a[0],s[1]+0.5*a[1])\nr=evaluate_rollout((0,0),[(1,0)]*3,[(1,0),(2,0),(3,0)],f)\nassert r[\"mse_by_step\"]==[0.125,0.5,1.125]\nassert abs(r[\"mean_mse\"]-7/12)<1e-10"
+      },
+      {
+        "name": "两个坐标都参与指标",
+        "code": "r=evaluate_rollout((0,0),[(0,0)],[(0,2)],lambda s,a:(0,0))\nassert r[\"mean_mse\"]==2"
+      },
+      {
+        "name": "无动作无需调用模型",
+        "code": "def no_call(s,a):\n    raise AssertionError(\"不应调用\")\nr=evaluate_rollout((0,0),[],[],no_call)\nassert r=={\"predictions\":[],\"mse_by_step\":[],\"mean_mse\":0}"
+      },
+      {
+        "name": "标签长度错误应报错",
+        "code": "try:\n    evaluate_rollout((0,0),[(1,0)],[],lambda s,a:s)\n    assert False\nexcept ValueError:\n    pass"
+      }
+    ],
+    "hints": [
+      "维护一个 state 变量，每一步都替换成 predictor 的输出。",
+      "targets 只出现在评测误差的计算里。",
+      "记录每个 horizon 的误差，再计算总体均值；只报告平均数会掩盖远期退化。"
+    ],
+    "explanation": "单步评测通常输入真实状态，free-running rollout 输入自己的预测。两者衡量不同条件下的表现。状态误差也不等于任务成功率；具身应用还要做闭环评测和动作条件检查。"
+  }
+]

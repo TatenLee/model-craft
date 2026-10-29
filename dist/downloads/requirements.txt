@@ -1,0 +1,3 @@
+# Browser exercise scripts need only Python's standard library.
+# Install this requirement only for tiny_lm.py and tiny_world_model.py.
+torch>=2.4,<3

@@ -1,0 +1,14 @@
+.DS_Store
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.openai/local/
+test-results/
+*.zip
+!dist/downloads/*.zip
+*.tar.gz
+*.tgz
+dist/.openai/
+test/
+tests/
