@@ -58,13 +58,19 @@ git push
 
 ## 内容与功能
 
-- 12 周 / 36 节完整主课：正文、原创代码示例、理解检查、练习与一手资料。
+- 12 周 / 36 节循序讲解：前置课程、新词定义与例子、编号讲解、完整算例、代码与预期输出、引导练习及排错提示。
+- 每周七天，共 84 份每日安排，说明要做什么、用多少时间、应产出什么；当天任务可以拆成多次 30 分钟完成。
+- 36 个课内 Python 示例可直接在网页打开、修改和运行；72 道开放检查题均有独立提示、参考解析及回看讲解入口。
 - 概念地图覆盖预训练、后训练、AR、SFT、LoRA、JEPA、视觉塔、KDA、Decoder-only、世界模型、具身、LSD、MMLU、MMMU、MMStar 等。PT / rewardx 保留待确认语境；LSD 标记项目特定。
 - 6 个交互实验：真实回归梯度更新、因果可见性、LoRA 参数预算、rollout、记忆与梯度窗口、Flow Matching 路径。
 - 8 个浏览器 Python 练习：代码在 Web Worker 中通过 Pyodide 执行，真实断言评分。首次运行需访问固定版本的公开 CDN；运行可取消并有超时控制。
-- 按周 / 阶段 / 概念测验与错题复习。
+- 48 道按周 / 阶段 / 概念组织的测验题，答题后可直接返回已讲解该内容的课文；默认从第一周周测开始。
 - 实验手记、课文笔记、进度导入导出；进度默认仅保存到浏览器 localStorage，没有跨设备云同步。
 - 可下载的微型语言模型、动作条件世界模型 PyTorch 训练脚本。
+
+第一周从「模型、输入、目标、参数」开始，再做一次梯度更新，最后学习独立评测。SFT 和 LoRA 放在第五周分别定义、推演和练习后，才比较二者的关系。后续依次连接视觉表示、图像生成、世界模型、KDA 状态、具身策略和实际项目实验。
+
+课内示例属于探索实验，不计入八个编程挑战的通过数量。奖励选择、KDA 标量递推等机制示意都说明了与完整训练实现的区别；开放题通过对照解析自查，没有 GPT 自动判卷。原有笔记和阅读记录保留，但旧版已读状态不等于完成新版内容；已改写的选择题使用新 ID，避免沿用旧答案评分。
 
 ## 验证
 
@@ -76,7 +82,9 @@ npm run test:python
 python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
 ```
 
-`npm ci` 只为开发检查安装依赖，本地浏览课程不需要。`test:python` 首次需联网获取 Pyodide 标准库，它使用与网页相同的 Python 执行器和断言，在 Node 中运行 WASM。
+`npm ci` 只为开发检查安装依赖，本地浏览课程不需要。`test:python` 首次需联网获取 Pyodide 标准库，它使用与网页相同的 Python 执行器和断言，在 Node 中运行 WASM。Pages 工作流会执行这项检查，核对全部课内示例的实际输出。
+
+本轮课程改版已验证：11 项内容与应用测试通过，覆盖课程前置顺序、每日预算、题目回看入口、课内示例导航与代码保存、无评分示例不增加挑战成绩；36 个课内示例在本机 Python 和 Pyodide 中的输出均与正文一致。结构检查只能防止缺项和部分回归，不等同于对教学效果的认证。
 
 首版已验证：全部课程与概念路由、阅读和笔记保存、收藏搜索、测验评分、实验记录创建编辑；8 个 Python 练习共 40 个参考解法断言通过，未完成代码和异常代码会被判失败。两个 PyTorch 示例已在 Mac CPU 上真实运行。固定 seed=42 的教学数据上，语言模型 40 步验证 loss 从 3.69 降至 1.51；世界模型 80 步 rollout MSE 从 0.234 降至 0.00167。这些数值仅是运行验证，不是现实任务性能承诺。
 
@@ -86,7 +94,10 @@ python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
 
 ## 维护
 
-- `dist/data/curriculum.js`：课程和课文。
+- `dist/data/curriculum.js`：课程入口与可运行课内示例。
+- `dist/data/course/week-01.js` 至 `week-12.js`：逐周维护的课文、推演、提示、解析和引导练习。
+- `dist/data/course/schedule.js`：每日学习安排与每周交付物。
+- `dist/course-ui.js`：分步课文、课程目录和每日安排的界面。
 - `dist/data/concepts.js`：概念、来源和题库。
 - `dist/data/exercises.js`：Python 练习、检查器与参考解法。
 - `dist/app.js`、`dist/styles.css`：应用与响应式界面。

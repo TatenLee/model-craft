@@ -11,4 +11,3 @@ test-results/
 *.tgz
 dist/.openai/
 test/
-tests/

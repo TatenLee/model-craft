@@ -31,6 +31,8 @@ jobs:
         run: npm run check
       - name: Check content and application behavior
         run: npm test
+      - name: Run lesson examples and challenges in Python WASM
+        run: npm run test:python
       - name: Check Python reference solutions
         run: python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
       - name: Upload the static site
