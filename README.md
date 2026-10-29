@@ -27,7 +27,7 @@ git commit -m "Add Model Craft learning app and Pages deployment"
 git push -u origin main
 ```
 
-3. 打开 GitHub 仓库 **Settings → Pages → Build and deployment → Source**，选择 **GitHub Actions**。仓库已自带工作流，不需要再创建示例工作流。
+3. 打开 [仓库的 Pages 设置](https://github.com/TatenLee/model-craft/settings/pages)，在 **Build and deployment → Source** 选择 **GitHub Actions**。这是首次发布的必要设置；仅上传工作流不会自动启用 Pages。仓库已自带工作流，不需要再创建示例工作流。
 4. 打开 **Actions → Deploy GitHub Pages → Run workflow**，选择 `main` 并运行。首次 push 可能早于启用 Pages；启用后手动运行一次即可。
 5. 两个 job 都成功后，在 **Settings → Pages** 或部署任务中打开网站。默认项目地址为 `https://tatenlee.github.io/model-craft/`，访客无需登录 GPT 或 GitHub。
 
@@ -44,6 +44,17 @@ git push
 学习进度按网站来源保存在浏览器中。换到 GitHub Pages 地址前，在原站点导出进度，再到新站点导入；登录账号不会自动迁移进度。
 
 参考：[GitHub Pages 发布源设置](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)、[GitHub Pages 自定义工作流](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)。
+
+### 发布失败排查
+
+- **`Get Pages site failed` / `HttpError: Not Found`**：优先检查仓库 **Settings → Pages** 是否已经启用，并把 Source 设为 **GitHub Actions**。若该页面只显示升级提示，请核对仓库可见性和账号套餐：GitHub Free 支持公开仓库的 Pages，私有仓库需要支持它的套餐。完成设置后运行最新 `main` 分支的工作流。
+- **`enablement` 提示**：当前工作流有发布所需的 `pages: write` 和 `id-token: write` 权限。`configure-pages` 的 `enablement: true` 另需非默认的令牌，因此不能只添加这一行就让默认 `GITHUB_TOKEN` 自动启用 Pages。手动开启一次即可，之后正常发布无需额外令牌。
+- **Node.js 20 弃用提示**：指 Action 自身的运行环境，与项目里 `setup-node` 的版本设置不同。工作流已升级到 `configure-pages@v6`、`upload-pages-artifact@v5` 和 `deploy-pages@v5`。
+- **`ubuntu-latest` 迁移提示**：指 GitHub 托管运行器镜像将发生变化。工作流已固定为 `ubuntu-24.04`。这类迁移警告不是 Pages API 返回 404 的原因。
+
+修改工作流后应推送新提交，再在 **Actions → Deploy GitHub Pages** 查看新运行或手动运行最新 `main`。对旧运行点击 Re-run 会使用旧提交中的工作流。若只修改了仓库 Pages 设置，则可以直接重跑原有运行。
+
+参考：[configure-pages 的输入与令牌要求](https://github.com/actions/configure-pages/blob/v6/action.yml)、[GitHub Pages 可用范围](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages)。
 
 ## 内容与功能
 

@@ -15,7 +15,7 @@ concurrency:
 jobs:
   verify:
     name: Check and package the site
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Check out source
@@ -34,14 +34,14 @@ jobs:
       - name: Check Python reference solutions
         run: python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
       - name: Upload the static site
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
   deploy:
     name: Publish the site
     needs: verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
       pages: write
@@ -51,7 +51,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Configure Pages
-        uses: actions/configure-pages@v5
+        # Enable Pages once in repository Settings > Pages, with Source = GitHub Actions.
+        # GITHUB_TOKEN can publish to an enabled site, but cannot enable Pages itself.
+        uses: actions/configure-pages@v6
       - name: Deploy
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
