@@ -13,7 +13,7 @@ import week12 from './course/week-12.js';
 import {weekMetadata} from './course/weeks.js';
 import {enrichWeek} from './course/schedule.js';
 
-export const COURSE_REVISION = 'guided-v2';
+export const COURSE_REVISION = 'daily-v3';
 export const lessons = [...week01,...week02,...week03,...week04,...week05,...week06,...week07,...week08,...week09,...week10,...week11,...week12 ];
 export const weeks = weekMetadata.map(w=>enrichWeek(w,lessons));
 export const lessonExamples = lessons.map(l=>({

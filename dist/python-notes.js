@@ -1,0 +1,5 @@
+// Optional syntax reminders, selected from constructs used in each reference implementation.
+export function pythonNotes(code){
+ const notes=[['return','函数把结果交回调用者','return [4, 7] 让测试能接到一个列表。print([4, 7]) 只显示文字，函数仍可能返回 None；两者用途不同。'],[' for ','列表推导式与循环','[x*2 for x in [1,2]] 得到 [2,4]。可以先写 out=[]、逐个 out.append(x*2)，确认理解后再压缩成一行。'],['zip(','按位置配对','zip([1,2],[3,6]) 依次给出 (1,3)、(2,6)。本题契约会说明长度是否相同；zip 本身遇到较短列表会停止。'],['range(','循环的下标范围','range(3) 产生 0、1、2，不包含 3；range(1,4) 产生 1、2、3。先明确下标和实际步号是否从同一个数字开始。'],['enumerate(','同时拿到下标和内容','for i, value in enumerate([4,7]) 会依次得到 (0,4)、(1,7)。i 用于找对应位置，value 是这一项的实际数值。'],['lambda','给另一个函数传一条计算规则','lambda s,a: s+a 是一个接收 s、a 并返回它们之和的函数。可以改写成普通 def，数值含义不变。'],['key=','指定如何比较候选','min(rows, key=lambda r:r["loss"]) 返回 loss 最小的那条记录，返回的不是 loss 数字本身。'],['dict(','复制字典的外层','dict(config) 产生一个新字典。本课程扁平配置用浅复制即可；嵌套列表或字典仍可能共享，需要另行处理。'],['math.','标准库的数值工具','import math 后，math.sqrt(4)=2，math.exp(0)=1，math.log(1)=0。自然对数 log 的输入必须为正，不能直接对 0 求 log。']];
+ return notes.filter(([needle])=>code.includes(needle)).map(([,title,body])=>({title,body}));
+}

@@ -5,6 +5,7 @@ import {resolve} from 'node:path';
 import vm from 'node:vm';
 import {loadPyodide} from 'pyodide';
 import {exercises} from '../dist/data/exercises.js';
+import {dailyChallenges} from '../dist/data/practice/index.js';
 import {lessonExamples} from '../dist/data/curriculum.js';
 const cache=resolve('.openai/local');await mkdir(cache,{recursive:true});
 const stdlib=resolve(cache,'python_stdlib.zip');
@@ -22,13 +23,18 @@ const context=vm.createContext({self:{postMessage:message=>messages.push(message
 vm.runInContext(await readFile(new URL('../dist/python-worker.js',import.meta.url),'utf8'),context);
 async function run(code,tests){messages=[];await context.self.onmessage({data:{code,tests}});const result=messages.find(m=>m.type==='result');assert.ok(result,JSON.stringify(messages));return result.result;}
 let total=0;
-for(const exercise of exercises){
+for(const exercise of [...exercises,...dailyChallenges]){
  const result=await run(exercise.solution,exercise.tests);
- assert.equal(result.error,null);assert.equal(result.tests.length,exercise.tests.length);
+ assert.equal(result.error,null,exercise.id);assert.equal(result.tests.length,exercise.tests.length,exercise.id);
  assert.ok(result.tests.every(check=>check.passed),JSON.stringify(result));total+=result.tests.length;
  const starter=await run(exercise.starter,exercise.tests);
  assert.ok(starter.error||starter.tests.some(check=>!check.passed),'incomplete starter must not pass');
 }
+// Wrong constant implementations must be rejected, with expected/actual values for repair.
+const predictChallenge=dailyChallenges[0];
+const wrong=await run('def predict(xs,w,b):\n    return [0 for _ in xs]',predictChallenge.tests);
+assert.ok(wrong.tests.some(t=>!t.passed));
+assert.match(wrong.tests.find(t=>!t.passed).error,/预期:.*实际:/s);
 const broken=await run('raise ValueError("test failure")',[]);assert.match(broken.error,/ValueError/);
 const output=await run('print("真实 Python 输出")',[]);assert.match(output.stdout,/真实 Python 输出/);
 for(const example of lessonExamples){

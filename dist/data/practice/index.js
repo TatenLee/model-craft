@@ -1,0 +1,13 @@
+import w1 from './week-01.js';
+import w2 from './week-02.js';
+import w3 from './week-03.js';
+import w4 from './week-04.js';
+import w5 from './week-05.js';
+import w6 from './week-06.js';
+import w7 from './week-07.js';
+import w8 from './week-08.js';
+import w9 from './week-09.js';
+import w10 from './week-10.js';
+import w11 from './week-11.js';
+import w12 from './week-12.js';
+export const dailyChallenges=[...w1,...w2,...w3,...w4,...w5,...w6,...w7,...w8,...w9,...w10,...w11,...w12];
