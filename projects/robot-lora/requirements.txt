@@ -1,0 +1,5 @@
+# Optional pretrained-model experiment; not required for the website or world-lab.
+torch>=2.4,<3
+transformers>=4.51,<6
+peft>=0.15,<1
+accelerate>=1,<2

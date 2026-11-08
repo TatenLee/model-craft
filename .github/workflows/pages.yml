@@ -35,6 +35,8 @@ jobs:
         run: npm run test:python
       - name: Check Python reference solutions
         run: python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
+      - name: Verify project download matches teaching source
+        run: python3 scripts/package_projects.py --check
       - name: Upload the static site
         uses: actions/upload-pages-artifact@v5
         with:

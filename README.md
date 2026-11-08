@@ -2,6 +2,20 @@
 
 面向有编程与数据工程经验、希望转向具身智能 / 世界模型训练算法的学习者。12 周课程，约 130 小时，不设独立数学基础章节。
 
+## 项目实战：带着模型学，再读懂 OmniFM
+
+入口 `#/projects`，建议从 `#/projects/world-contract` 开始。新增 3 条相连路径、16 关分步讲解、16 道互动判断和 16 道可执行 Python 机制题，连同原课程共 72 道挑战。每关包含设计理由、备选方案、手算推演、自动检查、本地实验命令、失败诊断、源码迁移问题和实验交接单。
+
+- **世界模型主线：**状态转移 → 基线 → MLP → 因果 Transformer → rollout → 视觉塔 / JEPA → 显式状态与 KDA 阅读。
+- **后训练支线：**机器人指令 JSON → SFT 回答监督 → LoRA 核心层与可选基座训练器 → 任务评测 → 推理 cache。
+- **训练工程：**loss 归一化 → 恢复与 TBPTT → 消融 / 性能报告 → OmniFM 真实训练链。
+
+完整运行说明见 [projects/README.md](projects/README.md)，网页可下载同一份实战代码。world-lab 提供原创合成动力学、三个神经网络骨干、CPU/MPS/CUDA 选项、训练/验证、闭环误差、持久化 checkpoint、严格配置恢复和前向计时。已在 CPU 跑通；GRU 只教状态接口，矩阵 delta 题只教记忆修正，都不是完整 KDA。
+
+本地源码索引只定位符号、行号与文件哈希；默认写入已忽略的 `.openai/local/`。网页在内存读取，不上传、不存进备份。实际 OmniFM run 配置未知，功能存在不等于启用。公司源码、配置值、数据与权重没有进入公开代码包。
+
+进度分别记录「机制验证」和「实验观察」；代码改变使旧检查失效，样例运行或导入报告不会自动通关。报告是学习者提供的证据，平台不认证其真实性。进阶 DINO、完整 KDA、多卡和部署性能实验仍需实际执行；三个月路线不承诺掌握全部方法或保证转岗。
+
 ## 本地启动
 
 ```bash
@@ -81,7 +95,7 @@ git push
 - 36 个课内 Python 示例可直接在网页打开、修改和运行；72 道开放检查题均有独立提示、参考解析及回看讲解入口。
 - 概念地图覆盖预训练、后训练、AR、SFT、LoRA、JEPA、视觉塔、KDA、Decoder-only、世界模型、具身、LSD、MMLU、MMMU、MMStar 等。PT / rewardx 保留待确认语境；LSD 标记项目特定。
 - 6 个交互实验：真实回归梯度更新、因果可见性、LoRA 参数预算、rollout、记忆与梯度窗口、Flow Matching 路径。
-- 56 个浏览器 Python 挑战：48 道每日与周综合题，以及原有 8 道专项练习。代码在 Web Worker 中通过 Pyodide 执行，真实断言评分。首次运行需访问固定版本的公开 CDN；运行可取消并有超时控制。
+- 72 个浏览器 Python 挑战：48 道每日与周综合题、原有 8 道专项练习与 16 道项目机制题。代码在 Web Worker 中通过 Pyodide 执行，真实断言评分。首次运行需访问固定版本的公开 CDN；运行可取消并有超时控制。
 - 48 道按周 / 阶段 / 概念组织的测验题，答题后可直接返回已讲解该内容的课文；默认从第一周周测开始。
 - 实验手记、课文笔记、进度导入导出；进度默认仅保存到浏览器 localStorage，没有跨设备云同步。
 - 可下载的微型语言模型、动作条件世界模型 PyTorch 训练脚本。
@@ -110,8 +124,14 @@ python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
 
 本地训练项目见 `dist/downloads/README.md`。GPU 训练不在浏览器内执行。学习进度区分“阅读完成”“测验最近答对”“代码检查通过”，不把读完页面当作能力认证。
 
+本轮实战验证：18 项 Node 内容/DOM 交互测试，72 道挑战共 251 条 Pyodide 断言与 36 个示例；4 项 PyTorch 世界模型测试覆盖因果性、状态分块、轨迹与恢复；2 项 SFT/LoRA 检查使用离线随机微型 Qwen2 跑通 baseline/full/lora CLI。另在 CPU 真实训练 4 组 100 步实验，观察值显示在实战首页。Qwen2.5-0.5B 预训练权重、DINO 和 KDA GPU 训练未运行。
+
+实战检查：`python3 scripts/package_projects.py --check` 核对下载包；激活 PyTorch 环境后运行 `python projects/world-lab/test_lab.py`；可选依赖就绪后运行 `python projects/robot-lora/test_train.py`，用本地随机初始化的微型 Qwen2 检查三种训练入口，无需下载预训练权重。
+
 ## 维护
 
+- `dist/data/projects.js`、`dist/project-ui.js`、`dist/project-state.js`：16 关实战、独立进度、本地报告读取与源码索引。
+- `projects/`：原创教学训练项目与本地阅读工具；`scripts/package_projects.py` 只打包允许列表，CI 检查同步。
 - `dist/data/curriculum.js`：课程入口与可运行课内示例。
 - `dist/data/days.js`、`dist/data/reading-guides.js`：每日单元、深化案例、互动题与周总结。
 - `dist/data/practice/week-01.js` 至 `week-12.js`：48 道每日和周综合编程题、参考实现与验收用例。
