@@ -16,6 +16,18 @@
 
 进度分别记录「机制验证」和「实验观察」；代码改变使旧检查失效，样例运行或导入报告不会自动通关。报告是学习者提供的证据，平台不认证其真实性。进阶 DINO、完整 KDA、多卡和部署性能实验仍需实际执行；三个月路线不承诺掌握全部方法或保证转岗。
 
+## 深入项目工作坊
+
+在原有16关机制练习之上，新增10个完整项目工作坊、50个可分别记录进度的里程碑。每一步都有前置解释、操作顺序、命令、预期观察、排错方法、交付物、答辩问题与参考分析。项目涵盖语言预训练、SFT/LoRA、DPO、视觉/DINO、Flow生成、世界模型、状态/KDA、MPC策略、训练/推理工程和OmniFM综合审计。
+
+工作坊入口如 `#/projects/workshop-pretrain`、`#/projects/workshop-world-model`。每个里程碑支持实际观察笔记、交付清单、自查记录、带练交接单和内存内报告查看；原有进度保留，新增记录随备份导入导出。自查没有自动算法评分或岗位认证含义。
+
+新增 `projects/advanced-labs/` 提供DPO、二维Flow、视觉位置读出、KV缓存/量化存储和世界模型MPC实验。`student_ops.py` 是学习者实现区，`check_ops.py --task dpo|flow|quant` 检查数值、梯度与边界；通过后用 `--ops` 将自己的函数接入实际训练或评测。各实验有明确的完整模型/硬件范围，DINO权重与真实KDA、多卡分支需另行验证。详见 [运行与验收指南](projects/advanced-labs/README.md)。
+
+本轮已通过22项内容/DOM交互检查，覆盖50个工作坊路由、记录保存、自查门槛、旧备份兼容和报告安全显示。新增CPU数值检查覆盖DPO梯度/稳定性、Flow路径、量化误差、缓存因果/分块和规划/视觉契约；各训练入口与学生函数接入亦有本地测试。真实浏览器视觉/CDN端到端、DINO权重、KDA GPU和多卡性能仍未验收。
+
+七个核心项目预算106小时，加约20小时机制练习与补课；三个月需约每周10–11小时。偏好、生成、规划三个扩展再预留32小时。时间是规划预算，不是掌握全部方法或录用的保证。转岗作品自评按数据、实现、实验、系统和讲解五项附证据，不根据勾选数量判断能力。
+
 ## 本地启动
 
 ```bash
@@ -124,7 +136,7 @@ python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
 
 本地训练项目见 `dist/downloads/README.md`。GPU 训练不在浏览器内执行。学习进度区分“阅读完成”“测验最近答对”“代码检查通过”，不把读完页面当作能力认证。
 
-本轮实战验证：18 项 Node 内容/DOM 交互测试，72 道挑战共 251 条 Pyodide 断言与 36 个示例；4 项 PyTorch 世界模型测试覆盖因果性、状态分块、轨迹与恢复；2 项 SFT/LoRA 检查使用离线随机微型 Qwen2 跑通 baseline/full/lora CLI。另在 CPU 真实训练 4 组 100 步实验，观察值显示在实战首页。Qwen2.5-0.5B 预训练权重、DINO 和 KDA GPU 训练未运行。
+此前16关版验证：18 项 Node 内容/DOM 交互测试，72 道挑战共 251 条 Pyodide 断言与 36 个示例；4 项 PyTorch 世界模型测试覆盖因果性、状态分块、轨迹与恢复；2 项 SFT/LoRA 检查使用离线随机微型 Qwen2 跑通 baseline/full/lora CLI。另在 CPU 真实训练 4 组 100 步实验，观察值显示在实战首页。Qwen2.5-0.5B 预训练权重、DINO 和 KDA GPU 训练未运行。
 
 实战检查：`python3 scripts/package_projects.py --check` 核对下载包；激活 PyTorch 环境后运行 `python projects/world-lab/test_lab.py`；可选依赖就绪后运行 `python projects/robot-lora/test_train.py`，用本地随机初始化的微型 Qwen2 检查三种训练入口，无需下载预训练权重。
 

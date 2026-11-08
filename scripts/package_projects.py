@@ -9,6 +9,12 @@ FILES = ["projects/README.md", "projects/requirements.txt", "projects/world-lab/
          "projects/robot-lora/inspect_data.py", "projects/robot-lora/mechanics.py",
          "projects/robot-lora/train.py", "projects/robot-lora/test_train.py", "projects/robot-lora/requirements.txt",
          "projects/robot-lora/README.md", "projects/source-map/inspect_repo.py"]
+FILES += ["dist/downloads/tiny_lm.py", "projects/advanced-labs/README.md",
+          "projects/advanced-labs/common.py", "projects/advanced-labs/preference.py",
+          "projects/advanced-labs/flow.py", "projects/advanced-labs/vision.py",
+          "projects/advanced-labs/cache.py", "projects/advanced-labs/planning.py",
+          "projects/advanced-labs/student_ops.py", "projects/advanced-labs/check_ops.py",
+          "projects/advanced-labs/test_labs.py"]
 DEST = ROOT / "dist/downloads/model-craft-projects.zip"
 
 

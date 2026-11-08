@@ -1,3 +1,6 @@
+import {workshops,portfolioRubric} from './data/workshops.js';
+import {workshopPage,missionCompletion,workshopReportHTML} from './workshop-ui.js';
+import {missionKey,missionStatus,handoff} from './workshop-state.js';
 import {projects,projectStages,projectExercises} from './data/projects.js';
 import {projectsHome,projectStagePage,projectCompletion,reportHTML,sourceHTML} from './project-ui.js';
 import {projectStatus,validateWorldReport,validateSourceMap} from './project-state.js';
@@ -13,7 +16,7 @@ import {labDefinitions,renderLab,bindLab} from './labs.js';
 import {STORAGE_KEY,createState,normalizeState,quizStats,currentWeek,escapeHTML as e,localDate} from './state.js';
 
 const allExercises=[...exercises,...lessonExamples,...dailyChallenges,...projectExercises];
-const catalog={weeks,lessons,categories,concepts,questions,exercises:allExercises,days,projectStages};
+const catalog={weeks,lessons,categories,concepts,questions,exercises:allExercises,days,projectStages,workshops,portfolioRubric};
 let state;try{const raw=localStorage.getItem(STORAGE_KEY);state=raw?normalizeState(JSON.parse(raw),catalog):createState();}catch{state=createState();}
 let conceptSearch='',conceptCategory='all',bookmarksOnly=false,quiz=null,quizMode='week-1',selectedAnswer=null;
 let cleanupLab=null,runner=null,runnerTimeout=null,runnerBusy=false,runResults={},hintCounts={},menuOpen=false;
@@ -51,11 +54,14 @@ function shell(page,content){
  return `<div class="layout">${menuOpen?'<div class="sidebar-backdrop" data-action="menu"></div>':''}<aside class="sidebar ${menuOpen?'open':''}" aria-label="主要导航"><a class="brand" href="#/dashboard"><span class="brand-mark">m<span>c</span></span><div><div class="brand-name">Model Craft</div><div class="brand-subtitle">大模型学习实验室</div></div></a><div class="nav-label">YOUR LEARNING SPACE</div><nav class="nav">${navs.map(([id,ic,label])=>`<a class="nav-link ${active===id?'active':''}" href="${href(id)}" ${active===id?'aria-current="page"':''}>${icon(ic)}<span>${label}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="journey-mini"><div class="between"><span class="small">12 周 · 算法工程师之路</span><span class="small muted">${pct()}%</span></div><div class="progress-track" role="progressbar" aria-label="每日学习完成进度" aria-valuenow="${pct()}" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width:${pct()}%"></div></div><p class="small muted" style="margin-top:8px">${completedDays()} / ${days.length} 天已完成学习</p></div><a class="nav-link ${active==='settings'?'active':''}" href="#/settings">${icon('settings')}<span>进度备份与设置</span></a><div class="user-row"><div class="avatar">S</div><div><p>Shawn 的学习空间</p><small class="muted">具身智能 / 世界模型</small></div></div></div></aside><div class="main-wrap"><header class="topbar"><div class="topbar-left"><button class="mobile-menu" data-action="menu" aria-label="打开导航" aria-expanded="${menuOpen}">${icon('menu')}</button><div class="breadcrumb"><span>我的学习空间</span><span>/</span><strong>${title}</strong></div></div><div class="topbar-right"><button class="top-search" data-action="search">${icon('search')}<span>搜索一个概念…</span><kbd>⌘ K</kbd></button><span class="local-tag"><i class="status-dot"></i>进度保存在本机</span><a href="#/settings" class="avatar" aria-label="学习设置">S</a></div></header><main class="content" id="main" tabindex="-1">${content}<footer class="footer-note"><span class="row">${icon('shield')}记录真实理解，让每次实验都有依据。</span><span>MODEL CRAFT · LEARN BY BUILDING</span></footer></main></div></div>`;
 }
 
-function dashboard(){return dailyDashboard(state,allExercises,questions).replace('<div class="daily-weeks">','<section class="panel panel-pad project-entry"><span class="eyebrow">新 · 项目实战</span><h2>带着一个小模型，逐步走向 OmniFM</h2><p>16 关带练：为什么这样设计 → 网页编程 → 本地训练 → 真实源码证据。与每日课程交替推进。</p><a class="btn btn-primary" href="#/projects">进入项目实战 →</a></section><div class="daily-weeks">');}
+function dashboard(){return dailyDashboard(state,allExercises,questions).replace('<div class="daily-weeks">','<section class="panel panel-pad project-entry"><span class="eyebrow">新 · 项目实战</span><h2>带着一个小模型，逐步走向 OmniFM</h2><p>16 关机制 + 10 个完整项目工作坊、50 个里程碑：实现、训练、排错、消融与答辩。</p><a class="btn btn-primary" href="#/projects">进入项目实战 →</a></section><div class="daily-weeks">');}
 function currentProject(){const r=route();return projectStages.find(s=>r.page==='projects'?s.id===r.id:r.page==='code'&&s.exercise.id===r.id);}
 function projectRecord(id){return state.projects[id]??={step:0,viewed:false,selected:null,notes:{},completedAt:''};}
 function refreshProjectProgress(){const stage=currentProject(),panel=document.getElementById('project-completion');if(stage&&panel)panel.innerHTML=projectCompletion(stage,state);}
-function projectsPage(id){if(!id)return projectsHome(state);const stage=projectStages.find(s=>s.id===id);return stage?projectStagePage(stage,state,dayEditor(stage.exercise)):notFound();}
+function workshopRecord(workshop,mission){return state.workshopProgress[missionKey(workshop,mission)]??={note:'',checked:[],reviewedAt:''};}
+function resolveMission(workshopId,missionId){const workshop=workshops.find(w=>w.id===workshopId),mission=workshop?.milestones.find(m=>m.id===missionId);return workshop&&mission?{workshop,mission}:null;}
+function refreshMission(workshop,mission){const panel=document.getElementById('workshop-completion');if(panel)panel.innerHTML=missionCompletion(workshop,mission,state);}
+function projectsPage(id){if(!id)return projectsHome(state);if(id.startsWith('workshop-')){const [name,missionId]=id.slice(9).split('/');const workshop=workshops.find(w=>w.id===name);return workshop&&(!missionId||workshop.milestones.some(m=>m.id===missionId))?workshopPage(workshop,missionId,state):notFound();}const stage=projectStages.find(s=>s.id===id);return stage?projectStagePage(stage,state,dayEditor(stage.exercise)):notFound();}
 
 function coursePage(id){
  const week=weeks.find(w=>w.id===Number(id))||weeks.find(w=>w.id===getNextLesson().week)||weeks[0];
@@ -111,6 +117,12 @@ function render({keepScroll=false}={}){
  document.title=`${navs.find(n=>n[0]===(['lesson','day'].includes(r.page)?'course':r.page))?.[2]||'学习空间'} · Model Craft`;
 }
 function bindInputs(){
+ document.getElementById('workshop-note')?.addEventListener('input',ev=>{const pair=resolveMission(ev.target.dataset.workshop,ev.target.dataset.mission);if(!pair)return;workshopRecord(pair.workshop,pair.mission).note=ev.target.value;save();refreshMission(pair.workshop,pair.mission);document.getElementById('workshop-note-status').textContent='实际观察已保存到本机。';});
+ document.querySelectorAll('.workshop-check').forEach(input=>input.addEventListener('change',ev=>{const pair=resolveMission(ev.target.dataset.workshop,ev.target.dataset.mission);if(!pair)return;const r=workshopRecord(pair.workshop,pair.mission),i=Number(ev.target.value);r.checked=ev.target.checked?[...new Set([...r.checked,i])]:r.checked.filter(x=>x!==i);save();refreshMission(pair.workshop,pair.mission);}));
+ document.querySelectorAll('.portfolio-score').forEach(el=>el.addEventListener('change',ev=>{const key=ev.target.dataset.rubric,old=state.portfolio[key]||{evidence:''};state.portfolio[key]={...old,score:ev.target.value===''?null:Number(ev.target.value)};save();document.getElementById('portfolio-status').textContent='能力自评已保存；分档不是岗位认证。';}));
+ document.querySelectorAll('.portfolio-evidence').forEach(el=>el.addEventListener('input',ev=>{const key=ev.target.dataset.rubric;state.portfolio[key]={score:null,...state.portfolio[key],evidence:ev.target.value};save();document.getElementById('portfolio-status').textContent='自评证据已保存到本机。';}));
+ document.getElementById('workshop-report-file')?.addEventListener('change',async ev=>{const file=ev.target.files?.[0];if(!file)return;const panel=document.getElementById('workshop-report-result');try{if(file.size>1e6)throw new Error('请选择小于 1 MB 的报告。');panel.innerHTML=workshopReportHTML(JSON.parse(await file.text()));}catch(err){panel.textContent=err.message||'报告读取失败';}});
+
  document.querySelectorAll('.project-note').forEach(el=>el.addEventListener('input',ev=>{projectRecord(ev.target.dataset.stage).notes[ev.target.dataset.field]=ev.target.value;save();document.getElementById('project-note-status').textContent='实验记录已保存到本机。';}));
  document.querySelectorAll('.project-question').forEach(form=>form.addEventListener('submit',ev=>{ev.preventDefault();const stage=projectStages.find(s=>s.id===form.dataset.stage),data=new FormData(form);if(!stage||!data.has('answer'))return;const selected=Number(data.get('answer'));if(!Number.isInteger(selected)||selected<0||selected>=stage.check.options.length)return;projectRecord(stage.id).selected=selected;save();render({keepScroll:true});}));
  for(const [id,validate,html,target] of [['project-report-file',validateWorldReport,reportHTML,'project-report-result'],['project-source-file',validateSourceMap,sourceHTML,'project-source-result']]){
@@ -189,6 +201,9 @@ function exportExperiment(x){const labels={hypothesis:'假设',baseline:'基线'
 
 document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action]');if(!btn)return;const {action,id,week,index}=btn.dataset;
  switch(action){
+ case 'workshop-review':{const pair=resolveMission(btn.dataset.workshop,btn.dataset.mission);if(!pair)break;if(!missionStatus(pair.workshop,pair.mission,state).ready){toast('先记录实际观察并核对交付物');break;}workshopRecord(pair.workshop,pair.mission).reviewedAt=new Date().toISOString();save();render({keepScroll:true});toast('自查已保存，实验正确性继续由测试和实际证据验证。');break;}
+ case 'workshop-export':{const pair=resolveMission(btn.dataset.workshop,btn.dataset.mission);if(pair)download(pair.workshop.number+'-'+pair.mission.id+'-handoff.txt',handoff(pair.workshop,pair.mission,state),'text/plain;charset=utf-8');break;}
+
  case 'project-step':{const stage=projectStages.find(s=>s.id===id),step=Number(index);if(!stage||!Number.isInteger(step)||step<0||step>3)break;const record=projectRecord(id);record.step=step;if(step===3)record.viewed=true;save();render({keepScroll:true});break;}
  case 'project-complete':{const stage=projectStages.find(s=>s.id===id);if(!stage||!projectStatus(stage,state).ready){toast('先完成讲解、判断与当前代码的完整检查');break;}projectRecord(id).completedAt=new Date().toISOString();save();render({keepScroll:true});toast('机制验证已记录；本地实验继续单独积累证据。');break;}
  case 'project-export':{const stage=projectStages.find(s=>s.id===id);if(!stage)break;const record=projectRecord(id);download('model-craft-'+id+'-handoff.txt',stage.title+'\n目标：'+stage.goal+'\n\n'+[['hypothesis','假设与变量'],['observation','实际结果'],['explanation','解释与疑问'],['next','下一步']].map(([k,label])=>label+'：\n'+(record.notes[k]||'尚未记录')).join('\n\n')+'\n\n请从这一步继续带我诊断，一次只推进一个可验证的改动。','text/plain;charset=utf-8');break;}
