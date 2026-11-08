@@ -47,6 +47,8 @@ python projects/world-lab/lab.py --arch gru --observation partial --steps 80 --o
 
 验证集用于选配置。选择完成后才加 `--test` 运行独立测试与 `drag=0.95` 的分布外检查。反复根据测试结果选配置会破坏独立评估。合成轨迹按独立随机流生成，split 单位为 episode。已知动力学意味着不存在真实环境的传感器噪声、碰撞或复杂控制，不能将这些分数解释成机器人成功率。
 
+full 模式预测位置与速度，MSE 平均这两个输出维度；partial 模式只预测位置。两组 MSE 口径不同，不能直接据此给模型排名。比较架构时固定 observation 模式。
+
 训练报告的 latency 是 batch=1、context=16、warmup 后整段前向，没有 KV cache。p50/p95 不是服务端 TTFT，也未包含请求排队、网络、图像预处理。并发试跑会干扰计时，性能结论应独占资源重测。
 
 ## 支线：SFT 与 LoRA
