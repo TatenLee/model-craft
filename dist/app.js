@@ -1,3 +1,5 @@
+import './preferences.js';
+import {guidePage,bindGuide} from './guide-ui.js';
 import {workshops,portfolioRubric} from './data/workshops.js';
 import {workshopPage,missionCompletion,workshopReportHTML} from './workshop-ui.js';
 import {missionKey,missionStatus,handoff} from './workshop-state.js';
@@ -19,7 +21,7 @@ const allExercises=[...exercises,...lessonExamples,...dailyChallenges,...project
 const catalog={weeks,lessons,categories,concepts,questions,exercises:allExercises,days,projectStages,workshops,portfolioRubric};
 let state;try{const raw=localStorage.getItem(STORAGE_KEY);state=raw?normalizeState(JSON.parse(raw),catalog):createState();}catch{state=createState();}
 let conceptSearch='',conceptCategory='all',bookmarksOnly=false,quiz=null,quizMode='week-1',selectedAnswer=null;
-let cleanupLab=null,runner=null,runnerTimeout=null,runnerBusy=false,runResults={},hintCounts={},menuOpen=false;
+let cleanupGuide=null,cleanupLab=null,runner=null,runnerTimeout=null,runnerBusy=false,runResults={},hintCounts={},menuOpen=false;
 const root=document.getElementById('app');
 const paths={
  home:'M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z',
@@ -37,8 +39,8 @@ const paths={
  play:'M8 4l12 8-12 8z',plus:'M12 5v14M5 12h14',menu:'M4 6h16M4 12h16M4 18h16',back:'M19 12H5M10 7l-5 5 5 5',link:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',shield:'M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM8 12l3 3 5-6'
 };
 const icon=(name,cls='')=>`<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]||paths.layers}"/></svg>`;
-const navs=[['dashboard','home','学习工作台'],['course','book','12 周学习路线'],['projects','layers','项目实战'],['concepts','map','概念地图'],['labs','flask','交互实验室'],['code','code','代码练习'],['assessment','exam','测验与复习'],['notebook','note','实验手记']];
-const route=()=>{const parts=location.hash.replace(/^#\/?/,'').split('/');return {page:parts[0]||'dashboard',id:decodeURIComponent(parts.slice(1).join('/')||'')};};
+const navs=[['guide','map','学习导览'],['dashboard','home','学习工作台'],['course','book','12 周学习路线'],['projects','layers','项目实战'],['concepts','book','概念词典'],['labs','flask','交互实验室'],['code','code','代码练习'],['assessment','exam','测验与复习'],['notebook','note','实验手记']];
+const route=()=>{const parts=location.hash.replace(/^#\/?/,'').split('/');return {page:parts[0]||'guide',id:decodeURIComponent(parts.slice(1).join('/')||'')};};
 const href=(page,id='')=>`#/${page}${id?'/'+encodeURIComponent(id):''}`;
 const completedDays=()=>days.filter(d=>dayStatus(d,state,allExercises.find(ex=>ex.id===d.exerciseId)).completed).length;
 const pct=()=>Math.round(completedDays()/days.length*100);
@@ -51,10 +53,23 @@ function getNextLesson(){return lessons.find(l=>!state.completedLessons.includes
 function pageHeading(title,description,actions=''){return `<div class="page-heading"><div><h1>${e(title)}</h1><p>${e(description)}</p></div>${actions?`<div class="heading-actions">${actions}</div>`:''}</div>`;}
 function shell(page,content){
  const active=['lesson','day'].includes(page)?'course':page,nav=navs.find(n=>n[0]===active),title=nav?.[2]||(page==='settings'?'学习设置':'学习工作台');
- return `<div class="layout">${menuOpen?'<div class="sidebar-backdrop" data-action="menu"></div>':''}<aside class="sidebar ${menuOpen?'open':''}" aria-label="主要导航"><a class="brand" href="#/dashboard"><span class="brand-mark">m<span>c</span></span><div><div class="brand-name">Model Craft</div><div class="brand-subtitle">大模型学习实验室</div></div></a><div class="nav-label">YOUR LEARNING SPACE</div><nav class="nav">${navs.map(([id,ic,label])=>`<a class="nav-link ${active===id?'active':''}" href="${href(id)}" ${active===id?'aria-current="page"':''}>${icon(ic)}<span>${label}</span></a>`).join('')}</nav><div class="sidebar-bottom"><div class="journey-mini"><div class="between"><span class="small">12 周 · 算法工程师之路</span><span class="small muted">${pct()}%</span></div><div class="progress-track" role="progressbar" aria-label="每日学习完成进度" aria-valuenow="${pct()}" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width:${pct()}%"></div></div><p class="small muted" style="margin-top:8px">${completedDays()} / ${days.length} 天已完成学习</p></div><a class="nav-link ${active==='settings'?'active':''}" href="#/settings">${icon('settings')}<span>进度备份与设置</span></a><div class="user-row"><div class="avatar">S</div><div><p>Shawn 的学习空间</p><small class="muted">具身智能 / 世界模型</small></div></div></div></aside><div class="main-wrap"><header class="topbar"><div class="topbar-left"><button class="mobile-menu" data-action="menu" aria-label="打开导航" aria-expanded="${menuOpen}">${icon('menu')}</button><div class="breadcrumb"><span>我的学习空间</span><span>/</span><strong>${title}</strong></div></div><div class="topbar-right"><button class="top-search" data-action="search">${icon('search')}<span>搜索一个概念…</span><kbd>⌘ K</kbd></button><span class="local-tag"><i class="status-dot"></i>进度保存在本机</span><a href="#/settings" class="avatar" aria-label="学习设置">S</a></div></header><main class="content" id="main" tabindex="-1">${content}<footer class="footer-note"><span class="row">${icon('shield')}记录真实理解，让每次实验都有依据。</span><span>MODEL CRAFT · LEARN BY BUILDING</span></footer></main></div></div>`;
+ return `<div class="layout"><button class="sidebar-backdrop ${menuOpen?'':'hidden'}" data-action="menu" aria-label="关闭导航" tabindex="-1"></button>
+ <aside id="main-sidebar" class="sidebar ${menuOpen?'open':''}" aria-label="主要导航">
+ <div class="sidebar-heading"><a class="brand" href="#/guide" aria-label="Model Craft 学习导览"><span class="brand-mark">m<span>c</span></span><div class="brand-copy"><div class="brand-name">Model Craft</div><div class="brand-subtitle">大模型学习实验室</div></div></a><button class="sidebar-close" data-action="menu" aria-label="关闭导航">${icon('close')}</button></div>
+ <button class="sidebar-toggle" data-action="sidebar-toggle" aria-controls="main-sidebar" aria-expanded="true" aria-label="收起侧栏">${icon('back')}<span class="sidebar-toggle-label">收起侧栏</span></button>
+ <div class="nav-label">YOUR LEARNING SPACE</div><nav class="nav">${navs.map(([id,ic,label])=>`<a class="nav-link ${active===id?'active':''}" href="${href(id)}" title="${label}" aria-label="${label}" ${active===id?'aria-current="page"':''}>${icon(ic)}<span class="nav-text">${label}</span></a>`).join('')}</nav>
+ <div class="sidebar-bottom"><div class="journey-mini"><div class="between"><span class="small">12 周 · 算法工程师之路</span><span class="small muted">${pct()}%</span></div><div class="progress-track" role="progressbar" aria-label="每日学习完成进度" aria-valuenow="${pct()}" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width:${pct()}%"></div></div><p class="small muted" style="margin-top:8px">${completedDays()} / ${days.length} 天已完成学习</p></div><a class="nav-link ${active==='settings'?'active':''}" href="#/settings" title="进度备份与设置" aria-label="进度备份与设置">${icon('settings')}<span class="nav-text">进度备份与设置</span></a><div class="user-row"><div class="avatar">S</div><div class="user-copy"><p>Shawn 的学习空间</p><small class="muted">具身智能 / 世界模型</small></div></div></div>
+ </aside><div class="main-wrap"><header class="topbar"><div class="topbar-left"><button class="mobile-menu" data-action="menu" aria-label="打开导航" aria-controls="main-sidebar" aria-expanded="${menuOpen}">${icon('menu')}</button><div class="breadcrumb"><span>我的学习空间</span><span>/</span><strong>${title}</strong></div></div><div class="topbar-right"><button class="top-search" data-action="search" aria-label="搜索概念">${icon('search')}<span>搜索一个概念…</span><kbd>⌘ K</kbd></button><label class="theme-control"><span class="sr-only">外观模式</span><select data-ui-theme aria-label="外观模式"><option value="system">跟随系统</option><option value="light">浅色模式</option><option value="dark">暗色模式</option></select></label><span class="local-tag"><i class="status-dot"></i>本机保存</span></div></header><main class="content" id="main" tabindex="-1">${content}<footer class="footer-note"><span class="row">${icon('shield')}记录真实理解，让每次实验都有依据。</span><span>MODEL CRAFT · LEARN BY BUILDING</span></footer></main></div></div>`;
 }
 
-function dashboard(){return dailyDashboard(state,allExercises,questions).replace('<div class="daily-weeks">','<section class="panel panel-pad project-entry"><span class="eyebrow">新 · 项目实战</span><h2>带着一个小模型，逐步走向 OmniFM</h2><p>16 关机制 + 10 个完整项目工作坊、50 个里程碑：实现、训练、排错、消融与答辩。</p><a class="btn btn-primary" href="#/projects">进入项目实战 →</a></section><div class="daily-weeks">');}
+function toggleMenu(){
+ menuOpen=!menuOpen;
+ document.querySelector('.sidebar')?.classList.toggle('open',menuOpen);
+ document.querySelector('.sidebar-backdrop')?.classList.toggle('hidden',!menuOpen);
+ const button=document.querySelector('.mobile-menu');button?.setAttribute('aria-expanded',String(menuOpen));button?.setAttribute('aria-label',menuOpen?'关闭导航':'打开导航');
+ if(menuOpen)document.querySelector('.sidebar-close')?.focus();else button?.focus();
+}
+function dashboard(){return dailyDashboard(state,allExercises,questions).replace('<div class="daily-weeks">','<section class="panel panel-pad project-entry"><span class="eyebrow">新 · 项目实战</span><h2>带着一个小模型，逐步走向 OmniFM</h2><p>P01–P10 是完整作品，M01–M16 是按需机制练习。从能力地图找到项目的位置，再进入带练。</p><div class="row wrap"><a class="btn btn-primary" href="#/guide">先看学习导览 →</a><a class="btn" href="#/projects">进入项目实战</a></div></section><div class="daily-weeks">');}
 function currentProject(){const r=route();return projectStages.find(s=>r.page==='projects'?s.id===r.id:r.page==='code'&&s.exercise.id===r.id);}
 function projectRecord(id){return state.projects[id]??={step:0,viewed:false,selected:null,notes:{},completedAt:''};}
 function refreshProjectProgress(){const stage=currentProject(),panel=document.getElementById('project-completion');if(stage&&panel)panel.innerHTML=projectCompletion(stage,state);}
@@ -108,11 +123,13 @@ function settingsPage(){const terms=['预训练','后训练','PT','AR','SFT','Lo
 function notFound(){return '<section class="panel empty"><h3>没有找到这一页</h3><p>课程可能已经更新，请从学习路线继续。</p><a class="btn" href="#/course">返回课程</a></section>';}
 
 function render({keepScroll=false}={}){
- cleanupLab?.();cleanupLab=null;const r=route();
+ cleanupLab?.();cleanupLab=null;cleanupGuide?.();cleanupGuide=null;const r=route();
  if(runnerBusy)stopRunner();
- const pages={dashboard,projects:()=>projectsPage(r.id),course:()=>coursePage(r.id),day:()=>dayPage(r.id),lesson:()=>lessonPage(r.id),concepts:()=>conceptsPage(r.id),labs:()=>labsPage(r.id),code:()=>codePage(r.id),assessment:assessmentPage,notebook:notebookPage,settings:settingsPage};
+ const pages={guide:()=>guidePage(r.id,state),dashboard,projects:()=>projectsPage(r.id),course:()=>coursePage(r.id),day:()=>dayPage(r.id),lesson:()=>lessonPage(r.id),concepts:()=>conceptsPage(r.id),labs:()=>labsPage(r.id),code:()=>codePage(r.id),assessment:assessmentPage,notebook:notebookPage,settings:settingsPage};
  const scroll=window.scrollY;root.innerHTML=shell(r.page,(pages[r.page]||notFound)());
  if(r.page==='labs')cleanupLab=bindLab(r.id,openExperiment);
+ if(r.page==='guide')cleanupGuide=bindGuide();
+ window.ModelCraftUI.refresh();
  bindInputs();if(keepScroll)window.scrollTo(0,scroll);else window.scrollTo(0,0);
  document.title=`${navs.find(n=>n[0]===(['lesson','day'].includes(r.page)?'course':r.page))?.[2]||'学习空间'} · Model Craft`;
 }
@@ -214,7 +231,8 @@ document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action
  case 'custom-code':runCode(id,'custom');break;
  case 'lesson-section':{ev.preventDefault();const section=document.getElementById(id);section?.scrollIntoView?.({block:'start'});section?.focus({preventScroll:true});break;}
  case 'skip-content':ev.preventDefault();document.getElementById('main')?.focus();break;
- case 'menu':menuOpen=!menuOpen;render({keepScroll:true});break;
+ case 'menu':toggleMenu();break;
+ case 'sidebar-toggle':window.ModelCraftUI.set({sidebarCollapsed:!window.ModelCraftUI.get().sidebarCollapsed});break;
  case 'search':conceptSearch='';conceptCategory='all';bookmarksOnly=false;if(route().page==='concepts'){render();document.getElementById('concept-search')?.focus();}else{location.hash='#/concepts';setTimeout(()=>document.getElementById('concept-search')?.focus(),50);}break;
  case 'complete-lesson':state.completedLessons=state.completedLessons.includes(id)?state.completedLessons.filter(x=>x!==id):[...state.completedLessons,id];save();render({keepScroll:true});toast(state.completedLessons.includes(id)?'阅读已记录。再通过测验与代码检验理解。':'已撤销阅读标记');break;
  case 'category':conceptCategory=id;render({keepScroll:true});break;
@@ -244,7 +262,8 @@ document.addEventListener('click',ev=>{const btn=ev.target.closest('[data-action
  case 'reset-progress':if(confirm('将清空本机的阅读、答题、代码、笔记和实验记录。请先导出备份。确定清空？')){stopRunner(false);state=createState();quiz=null;runResults={};save();render();toast('已清空本机学习记录');}break;
  }
 });
-document.addEventListener('keydown',ev=>{if((ev.metaKey||ev.ctrlKey)&&ev.key.toLowerCase()==='k'){ev.preventDefault();document.querySelector('[data-action="search"]')?.click();}});
+document.addEventListener('change',ev=>{if(ev.target.matches('[data-ui-theme]'))window.ModelCraftUI.set({theme:ev.target.value});});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&menuOpen){toggleMenu();return;}if((ev.metaKey||ev.ctrlKey)&&ev.key.toLowerCase()==='k'){ev.preventDefault();document.querySelector('[data-action="search"]')?.click();}});
 window.addEventListener('hashchange',()=>{menuOpen=false;closeModal();if(runnerBusy)stopRunner();render();});
 window.addEventListener('storage',ev=>{if(ev.key===STORAGE_KEY&&ev.newValue){try{state=normalizeState(JSON.parse(ev.newValue),catalog);toast('已同步同一浏览器中另一页面的进度');}catch{}}});
 render();

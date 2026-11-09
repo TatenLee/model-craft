@@ -12,6 +12,7 @@ const source = {
 };
 // Each step teaches first, then checks the SAME mechanism with real Python.
 function stage(projectId,id,title,week,d){
+ title='M'+title; // Mechanisms keep stable IDs and progress, separate from P projects.
  const ex=challenge(week,2,title,{goal:d.goal,signature:d.signature,contract:d.contract,
    context:d.story,steps:d.steps,worked:d.walkthrough,mistake:d.failure,transfer:d.transfer,
    cases:d.cases,solution:d.solution,quiz:d.quiz});
@@ -170,7 +171,7 @@ export const projects=[
  {id:'engineering',title:'训练工程与转岗作品',tag:'综合 · 证据与性能',description:'把前两项实战变成可以重跑、恢复、测量和解释的项目；再用同一检查方式串起本地 OmniFM 的真实 run。',deliverable:'可复现命令、消融表、恢复测试、质量/资源报告、源码证据链与项目答辩。',range:'第 9–12 周',color:'purple'},
 ];
 export const capabilityMap=[
- ['训练基础与预训练','主线 01–05：数据、目标、梯度、优化器、因果预测、rollout','w3-l1'],
+ ['训练基础与预训练','机制 M01–M05：数据、目标、梯度、优化器、因果预测、rollout','w3-l1'],
  ['SFT / LoRA / 参数控制','09–11：回答监督、冻结与 rank、全量/低秩对照','w5-l2'],
  ['DINO / JEPA / 多模态','06–07：表示、connector、目标与坍塌；真实视觉训练是后续实验','w6-l2'],
  ['KDA / 长上下文 / 状态','08、14、16：机制、边界与真实源码；GPU kernel 验证待做','w9-l1'],
