@@ -10,6 +10,9 @@ export const categories = [
   { id: 'evaluation', label: '评测与证据', description: '判断能力与改动收益，识别指标的适用边界。' },
 ];
 const S = {
+  mopd:['MOPD · Multi-Teacher On-Policy Distillation','https://arxiv.org/abs/2606.30406'],
+  mopdPrompts:['MoPD · Mixture-of-Prompts Distillation','https://arxiv.org/abs/2412.19087'],
+  react:['ReAct · 推理与行动的交替','https://arxiv.org/abs/2210.03629'],
   transformer: ['Transformer 原论文', 'https://arxiv.org/abs/1706.03762'],
   cs336: ['Stanford CS336', 'https://cs336.stanford.edu/spring2025/'],
   torch: ['PyTorch 训练基础', 'https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html'],
@@ -58,6 +61,9 @@ function c(id, term, english, aliases, category, week, level, definition, analog
     sources: sourceKeys.map(key => ({ label: S[key][0], url: S[key][1] })), ...(status ? { status } : {}) };
 }
 export const concepts = [
+  c('mopd','MOPD','Multi-Teacher On-Policy Distillation',['多教师 on-policy 蒸馏','多教师同策略蒸馏'],'adaptation',5,'进阶','把多个领域教师的能力迁移到一个学生的后训练方法。','先让学生做题，再让对应领域老师对学生的实际过程给反馈。','学生生成轨迹，按领域选择冻结教师，在相同学生前缀上获得分布反馈并更新学生；不是平均教师参数。','机器人任务模块可以分别有规划和工具专长教师；最终仍要逐域评测能力是否保留。','属于训练链，不是可替换 KDA/DSA 的注意力结构；也不要与提示蒸馏 MoPD 混淆。',['sft','posttraining','mopd-prompts'],['mopd']),
+  c('mopd-prompts','MoPD（提示蒸馏）','Mixture-of-Prompts Distillation',['提示混合蒸馏'],'adaptation',6,'扩展','视觉语言模型的一种提示蒸馏研究，与多教师 on-policy 蒸馏是不同工作。','把手工提示提供的知识交给可学习提示。','根据论文中的提示与门控设计学习软提示，关注已见与未见类别的泛化。','看到 MoPD 时先核对全称、论文与输入输出，再判断它是否服务于视觉适配。','大小写不能单独确定语义；不要仅凭缩写推断实现。',['mopd','clip'],['mopdPrompts']),
+  c('agentic','Agentic 任务与工具循环','Agentic workflows',['Agent','工具调用','ReAct'],'embodied',10,'系统','围绕目标组织观察、决策、工具调用、反馈与终止的任务执行方式。','任务经理提出步骤，工具返回事实，验证器决定是否真的完成。','语言或规则模块提出子目标；编排层维护状态、处理返回值、执行预算和验证结果。','先去红色再去蓝色，只有环境确认到达才推进下一个目标，卡住则按预算终止。','一个 Agent 不等于一个新模型结构，也不等于一定需要多个模型或多个 Agent。',['planning','closed-loop','embodied-brain'],['react']),
   c('pretraining', '预训练', 'Pre-training', ['pretrain', '预训练模型'], 'stage', 1, '实现',
     '在较广的数据分布上训练基础能力的阶段。具体目标可以是预测文本、去噪图像或学习视觉表征。',
     '先积累通用材料和基本能力，再围绕具体工作进一步训练。',

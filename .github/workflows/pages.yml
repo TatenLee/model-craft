@@ -37,6 +37,13 @@ jobs:
         run: python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
       - name: Check teaching Python syntax
         run: python3 -m compileall -q projects
+      - name: Install CPU training dependency for the robot workbench
+        run: |
+          python3 -m venv "$RUNNER_TEMP/model-craft-robot-tests"
+          "$RUNNER_TEMP/model-craft-robot-tests/bin/python" -m pip install --disable-pip-version-check 'torch>=2.4,<3' --index-url https://download.pytorch.org/whl/cpu
+      - name: Check robot interfaces, training, resume and task loop
+        working-directory: projects/robot-workbench
+        run: '"$RUNNER_TEMP/model-craft-robot-tests/bin/python" -m unittest robot.tests'
       - name: Verify project download matches teaching source
         run: python3 scripts/package_projects.py --check
       - name: Upload the static site

@@ -67,6 +67,7 @@ test('guide navigation, P/M backlinks and appearance changes preserve an active 
  const q=s=>{const n=w.document.querySelector(s);assert.ok(n,s);return n;};
  const nav=async path=>{w.location.hash='#/'+path;await new Promise(r=>w.setTimeout(r,12));};
  const theme=value=>{q('[data-ui-theme]').value=value;q('[data-ui-theme]').dispatchEvent(new w.Event('change',{bubbles:true}));};
+ await nav('guide');
  assert.equal(w.document.querySelectorAll('.skill-node').length,6);
  for(const s of skillNodes){q(`[data-skill="${s.id}"]`).click();assert.equal(q('#skill-detail-title').textContent,s.title);assert.equal(q(`[data-skill="${s.id}"]`).getAttribute('aria-pressed'),'true');assert.equal(w.document.querySelectorAll('.skill-node[aria-pressed="true"]').length,1);assert.equal(w.location.hash,'#/guide/'+s.id);}
  await nav('guide/concepts');assert.equal(w.document.querySelectorAll('.concept-axis').length,7);assert.match(q('#main').textContent,/所以可以一起用/);

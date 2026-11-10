@@ -15,6 +15,26 @@ FILES += ["dist/downloads/tiny_lm.py", "projects/advanced-labs/README.md",
           "projects/advanced-labs/cache.py", "projects/advanced-labs/planning.py",
           "projects/advanced-labs/student_ops.py", "projects/advanced-labs/check_ops.py",
           "projects/advanced-labs/test_labs.py"]
+FILES += [
+    "projects/robot-workbench/README.md",
+    "projects/robot-workbench/robot/__init__.py",
+    "projects/robot-workbench/robot/contracts.py",
+    "projects/robot-workbench/robot/environment.py",
+    "projects/robot-workbench/robot/data.py",
+    "projects/robot-workbench/robot/models/__init__.py",
+    "projects/robot-workbench/robot/models/scalar.py",
+    "projects/robot-workbench/robot/models/dynamics.py",
+    "projects/robot-workbench/robot/models/perception.py",
+    "projects/robot-workbench/robot/models/brain.py",
+    "projects/robot-workbench/robot/training/__init__.py",
+    "projects/robot-workbench/robot/training/supervised.py",
+    "projects/robot-workbench/robot/training/distill.py",
+    "projects/robot-workbench/robot/planning.py",
+    "projects/robot-workbench/robot/agent.py",
+    "projects/robot-workbench/robot/evaluation.py",
+    "projects/robot-workbench/robot/cli.py",
+    "projects/robot-workbench/robot/tests.py",
+]
 DEST = ROOT / "dist/downloads/model-craft-projects.zip"
 
 
