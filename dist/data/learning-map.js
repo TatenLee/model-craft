@@ -1,7 +1,7 @@
 // These are complementary skills and taxonomy axes, not mutually exclusive model types.
 export const skillNodes=[
  {id:'data',side:'left',row:1,title:'定义任务与准备数据',question:'模型要解决什么问题？什么数据能教会它？',
-  intro:'先把业务要求写成输入、目标和成功标准，再检查数据来源、划分、标注与时间对齐。你已有的数据工程经验正好是入口；新的重点是判断数据怎样改变模型学到的行为。',
+  intro:'先把业务要求写成输入、目标和成功标准，再检查数据来源、划分、标注与时间对齐。不需要预先从事数据工程；从几条可检查的样本开始，判断数据怎样改变模型学到的行为。',
   example:'输入“向左走两格”，目标是规范 JSON。按语义组合划分后，再生成不同措辞，避免同一答案的改写同时进入训练与测试。',
   learn:['把任务写成输入 → 目标 → 评价的契约','定位重复、污染、错误标签和轨迹错位','解释 tokenizer、采样配比和 mask 如何影响监督'],
   concepts:['tokenizer','data-mixture','data-leakage','loss-mask'],projects:['pretrain','sft-lora','world-model'],
@@ -32,7 +32,7 @@ export const skillNodes=[
   outcome:'一份可重跑的正确性、恢复与性能报告。',connects:['model','embodied'],connection:'计算结构决定资源形态；具身任务还要求观测、推理和动作执行的时序配合。'},
  {id:'embodied',side:'right',row:3,title:'世界模型与具身系统',question:'如何把感知、预测和行动连接起来完成任务？',
   intro:'世界模型预测动作会带来什么变化；策略选择动作；规划利用预测来比较候选行动。把这些能力接进闭环，才能评估是否真的完成任务。',
-  example:'先用小世界学习状态与动作的关系，再加入视觉与历史，最后跟读 OmniFM 的一条真实训练链。“具身大脑”是系统角色描述，需要拆到具体接口和证据。',
+  example:'先用小世界学习状态与动作的关系，再加入视觉与历史，最后跟读一个公开训练项目；有权限时也可选 OmniFM。“具身大脑”是系统角色描述，需要拆到具体接口和证据。',
   learn:['区分状态、观测、动作、目标和时间戳','比较 teacher forcing、闭环 rollout 与控制成功率','沿真实 run 追踪配置、batch、loss、state、更新与推理'],
   concepts:['world-model','jepa','policy','planning','vla','closed-loop','embodied-brain'],projects:['world-model','planning','omnifm'],
   outcome:'一个能解释预测和控制失败的世界模型作品，以及真实 run 的证据链。',connects:['model','evaluation'],connection:'具身系统把前面各项能力汇合起来；真实配置与闭环结果决定具体结论。'},
@@ -54,7 +54,7 @@ export const projectOrientation={
  preference:{skills:['training','evaluation'],why:'标准答案之外，学习如何把“哪个回答更好”变成训练信号。',result:'DPO 核心实现、梯度检查、噪声偏好与 KL 对照。',previous:['sft-lora'],next:[]},
  vision:{skills:['data','model','evaluation'],why:'世界模型最终需要感知真实图像；先验证特征是否保留任务所需信息。',result:'像素 → 特征 → 位置读出，附空间池化与颜色偏移实验。',previous:['pretrain','world-model'],next:['memory','omnifm']},
  flow:{skills:['model','training','evaluation'],why:'补齐 AR 之外的一类生成方法，理解速度目标和采样过程。',result:'从噪声生成二维分布，并分析模式覆盖与积分步数。',previous:['pretrain'],next:['planning']},
- 'world-model':{skills:['data','model','training','evaluation','embodied'],why:'把通用训练闭环应用于“动作之后会发生什么”，建立你的目标方向主线。',result:'同观测下比较 MLP / Transformer / GRU，检查多步 rollout 与 OOD。',previous:['pretrain'],next:['vision','memory','planning']},
+ 'world-model':{skills:['data','model','training','evaluation','embodied'],why:'把通用训练闭环应用于“动作之后会发生什么”，建立世界模型方向的实验基线。',result:'同观测下比较 MLP / Transformer / GRU，检查多步 rollout 与 OOD。',previous:['pretrain'],next:['vision','memory','planning']},
  memory:{skills:['model','engineering','embodied'],why:'长轨迹需要明确记忆边界，才能读懂真实 KDA 的训练和推理。',result:'整段/分块、reset/detach、状态资源与实际 KDA 对齐的证据。',previous:['world-model'],next:['systems','omnifm']},
  planning:{skills:['model','evaluation','embodied'],why:'检验预测模型是否真正有助于选动作，并连接策略与闭环任务。',result:'随机、不动、oracle 与 learned MPC 的控制对照。',previous:['world-model'],next:['omnifm']},
  systems:{skills:['training','evaluation','engineering'],why:'把能运行的实验变成可恢复、可测量、可比较的工程系统。',result:'正确性、恢复、缓存、量化误差与真实负载性能报告。',previous:['pretrain','world-model','memory'],next:['omnifm']},

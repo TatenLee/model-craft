@@ -1,14 +1,19 @@
+import {emptyBook,normalizeBook} from './book-state.js';
 import {normalizeJourney} from './journey-state.js';
+import {normalizeLearner,normalizeFoundations} from './learning-state.js';
 import {normalizeWorkshopProgress,normalizePortfolio} from './workshop-state.js';
 import {normalizeProjects} from './project-state.js';
 import {normalizeDays} from './daily-state.js';
 export const STORAGE_KEY='model-craft:learning:v1';
 export function localDate(date=new Date()){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
-export function createState(){return {version:1,journey:{},journeyMinutes:60,startDate:localDate(),completedLessons:[],bookmarks:[],notes:{},answers:{},examHistory:[],code:{},codeResults:{},solutionsViewed:[],experiments:[],days:{},projects:{},workshopProgress:{},portfolio:{},submissions:[],architectureChecks:{}};}
+export function createState(){return {version:1,book:emptyBook(),learner:normalizeLearner(),foundations:{},journey:{},journeyMinutes:60,startDate:localDate(),completedLessons:[],bookmarks:[],notes:{},answers:{},examHistory:[],code:{},codeResults:{},solutionsViewed:[],experiments:[],days:{},projects:{},workshopProgress:{},portfolio:{},submissions:[],architectureChecks:{}};}
 const bounded=(value,n=12000)=>typeof value==='string'?value.slice(0,n):'';
 export function normalizeState(value,catalog){
  if(!value||typeof value!=='object'||Array.isArray(value)||value.version!==1)throw new Error('备份格式不受支持。请导入 Model Craft 导出的 JSON 文件。');
  const state=createState();
+ state.book=normalizeBook(value.book);
+ state.learner=normalizeLearner(value.learner);
+ state.foundations=normalizeFoundations(value.foundations);
  state.journey=normalizeJourney(value.journey);
  state.journeyMinutes=[30,60,120].includes(value.journeyMinutes)?value.journeyMinutes:60;
  state.days=normalizeDays(value.days,catalog.days);

@@ -76,7 +76,7 @@ test('mainline navigation, module placement, embedded grading, reuse, time choic
  const nav=async path=>{w.location.hash='#/'+path;await new Promise(resolve=>w.setTimeout(resolve,12));assert.deepEqual(errors,[]);};
  const input=(sel,value,event='input')=>{const el=q(sel);el.value=value;el.dispatchEvent(new w.Event(event,{bubbles:true}));};
  const saved=()=>JSON.parse(w.localStorage.getItem(STORAGE_KEY));
- assert.match(q('h1').textContent,/wx\+b/);assert.equal(q('.nav-reference').open,false);assert.equal(w.document.querySelectorAll('.journey-road-card').length,20);
+ assert.match(q('h1').textContent,/实践书/);assert.equal(q('.nav-reference').open,false);await nav('journey');assert.match(q('h1').textContent,/wx\+b/);assert.equal(w.document.querySelectorAll('.journey-road-card').length,20);
  q('[data-journey-minutes="30"]').click();assert.equal(saved().journeyMinutes,30);assert.match(q('#journey-session-plan').textContent,/今天只完成/);
  for(const s of journeyStages){await nav('journey/'+s.id);assert.equal(q('#code-editor').dataset.exercise,s.exerciseId);assert.match(q('h1').textContent,new RegExp(s.number));}
  await nav('journey/scalar');assert.equal(w.document.querySelector('#journey-update'),null);input('#journey-w','2');input('#journey-b','1');assert.match(q('#journey-calibration').textContent,/MSE：0/);

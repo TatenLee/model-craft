@@ -22,7 +22,7 @@ test('application navigation, learning progress, quiz grading and experiment wor
  const click=selector=>q(selector).click();
  const input=(selector,value)=>{q(selector).value=value;q(selector).dispatchEvent(new w.Event('input',{bubbles:true}));};
  const navigate=async path=>{w.location.hash='#/'+path;await new Promise(resolve=>w.setTimeout(resolve,10));assert.equal(errors.length,0,errors.map(String).join('\n'));};
- assert.match(q('h1').textContent,/从 wx\+b/);
+ assert.match(q('h1').textContent,/实践书/);
  click('.skip-link');assert.equal(w.document.activeElement.id,'main');
  await navigate('assessment');assert.equal(q('#quiz-mode').value,'week-1');
  await navigate('course/1');assert.equal(w.document.querySelectorAll('.day-plan').length,7);

@@ -35,6 +35,7 @@ FILES += [
     "projects/robot-workbench/robot/cli.py",
     "projects/robot-workbench/robot/tests.py",
 ]
+FILES += ["projects/lifecycle-lab/lifecycle.py", "projects/lifecycle-lab/test_lifecycle.py", "projects/lifecycle-lab/README.md"]
 DEST = ROOT / "dist/downloads/model-craft-projects.zip"
 
 

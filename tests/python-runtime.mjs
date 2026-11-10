@@ -1,3 +1,5 @@
+import {bookExercises} from '../dist/data/book-practice.js';
+import {foundations} from '../dist/data/foundations.js';
 // Executes the actual worker harness with Pyodide WASM in Node. This does not replace browser QA.
 import assert from 'node:assert/strict';
 import {readFile,mkdir,writeFile,access} from 'node:fs/promises';
@@ -26,7 +28,7 @@ const context=vm.createContext({self:{postMessage:message=>messages.push(message
 vm.runInContext(await readFile(new URL('../dist/python-worker.js',import.meta.url),'utf8'),context);
 async function run(code,tests){messages=[];await context.self.onmessage({data:{code,tests}});const result=messages.find(m=>m.type==='result');assert.ok(result,JSON.stringify(messages));return result.result;}
 let total=0;
-for(const exercise of [...exercises,...dailyChallenges,...projectExercises,...architectureExercises,...journeyExercises]){
+for(const exercise of [...exercises,...dailyChallenges,...projectExercises,...architectureExercises,...journeyExercises,...bookExercises]){
  const result=await run(exercise.solution,exercise.tests);
  assert.equal(result.error,null,exercise.id);assert.equal(result.tests.length,exercise.tests.length,exercise.id);
  assert.ok(result.tests.every(check=>check.passed),JSON.stringify(result));total+=result.tests.length;
@@ -48,3 +50,6 @@ for(const example of lessonExamples){
 }
 console.log(`${total} reference assertions passed in Pyodide; incomplete/error submissions rejected; stdout captured.`);
 console.log(`${lessonExamples.length} lesson examples executed with their documented output in the same Pyodide worker harness.`);
+
+for(const f of foundations){const result=await run(f.example.code,[]);assert.equal(result.error,null,f.id);assert.equal(result.stdout.trim(),f.example.output.trim(),f.id);}
+console.log('3 foundation examples executed with documented output.');

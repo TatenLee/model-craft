@@ -35,6 +35,8 @@ jobs:
         run: npm run test:python
       - name: Check Python reference solutions
         run: python3 dist/downloads/check_exercises.py dist/downloads/exercise_solutions.py
+      - name: Check lifecycle experiment branches and saved snapshots
+        run: python3 -m unittest discover -s projects/lifecycle-lab -p 'test_*.py'
       - name: Check teaching Python syntax
         run: python3 -m compileall -q projects
       - name: Install CPU training dependency for the robot workbench
