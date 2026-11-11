@@ -1,6 +1,7 @@
+import {simulationUnits} from './book-simulation.js';
 import {trainingUnits} from './book-training.js';
 const make=(id,goal,terms,steps,worked,practice,check,sources,extra={})=>({id,goal,terms:terms.map(([name,meaning])=>({name,meaning})),steps:steps.map(([title,...body])=>({title,body})),worked,practice:{action:practice[0],expected:practice[1],trouble:practice[2]},check:{prompt:check[0],options:check[1],answer:check[2],explanation:check[3]},sources:sources.map(([label,url])=>({label,url})),...extra});
-export const bookUnits=[...trainingUnits,
+export const bookUnits=[...trainingUnits,...simulationUnits,
  make('tensor','看到张量时，先说明每个轴代表什么，再考虑复杂运算。',[
  ['标量 / 向量 / 矩阵','一个数 / 一列有顺序的数 / 两个轴组织的数；张量推广到更多轴。'],['shape','每个轴的长度，如 [batch, time, feature]；轴的语义由程序约定。']],
  [['从一条样本到一批样本','一次房价预测可能输入面积、楼龄两个数，是长度为 2 的向量。三套房组合成 [3,2] 的矩阵，第一个轴是样本，第二个轴是特征。把轴交换后数字数量没变，但运算含义变了。'],['模型参数也有形状','X 为 [B,2]，W 为 [2,1]，X@W 得到 [B,1]，表示每条样本一个预测。偏置 b 是 [1]，可广播到所有样本；如果 y 是 [B]，某些框架相减会广播成 [B,B]，程序不报错却学错目标。'],['导数只补当前需要的一步','导数告诉你参数稍微改变时 loss 如何变化。对于 L=(wx+b-y)^2，dL/dw=2(wx+b-y)x。先用一条样本验证符号，再扩到平均 loss；无需先读完一本高等数学才能训练小模型。']],

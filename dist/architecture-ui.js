@@ -1,3 +1,4 @@
+import {conceptGuideHTML} from './concept-guide-ui.js';
 import {architectures,architectureGroups,architectureRelations,architectureModels,architectureSources,architectureUpdated} from './data/architectures.js';
 import {architectureLessons} from './data/architecture-lessons.js';
 import {architectureExercises} from './data/architecture-practice.js';
@@ -50,7 +51,7 @@ function catalogPage(id){
 function detail(x){
  const g=group(x.group),relations=architectureRelations.filter(r=>r.from===x.id||r.to===x.id);
  const deep=['deltanet','gdn','kda','gdn2'].includes(x.id)?'delta':g.lesson;
- return `<article class="panel panel-pad arch-detail" id="architecture-detail"><div class="between wrap"><span class="badge">${e(g.name)} · ${e(x.axis)}</span><a class="text-link" href="#/architectures/catalog">回到目录</a></div><h2>${e(x.name)}</h2>${[['为什么需要它',x.purpose],['它怎样计算',x.mechanism],['收益、代价与限制',x.cost],['怎样验证理解',x.experiment]].map(([title,body])=>`<section><h3>${title}</h3><p>${e(body)}</p></section>`).join('')}<div class="row wrap"><a class="btn btn-primary" href="#/architectures/learn/${deep}">从这一族的讲解开始 →</a><a class="btn" href="#/architectures/compare/${x.id}">放入对比表</a></div>${relations.length?`<h3>和其他结构是什么关系？</h3><div class="arch-relation-list">${relations.map(relationRow).join('')}</div>`:''}<h3>对应实战</h3><div class="row wrap">${projects(g.projects)}</div><h3>公开来源</h3>${sourceList(x.sources)}</article>`;
+ return `<article class="panel panel-pad arch-detail" id="architecture-detail"><div class="between wrap"><span class="badge">${e(g.name)} · ${e(x.axis)}</span><a class="text-link" href="#/architectures/catalog">回到目录</a></div><h2>${e(x.name)}</h2>${[['为什么需要它',x.purpose],['它怎样计算',x.mechanism],['收益、代价与限制',x.cost],['怎样验证理解',x.experiment]].map(([title,body])=>`<section><h3>${title}</h3><p>${e(body)}</p></section>`).join('')}<div class="row wrap"><a class="btn btn-primary" href="#/architectures/learn/${deep}">从这一族的讲解开始 →</a><a class="btn" href="#/architectures/compare/${x.id}">放入对比表</a></div>${conceptGuideHTML(x.id,{inline:true})}${relations.length?`<h3>和其他结构是什么关系？</h3><div class="arch-relation-list">${relations.map(relationRow).join('')}</div>`:''}<h3>对应实战</h3><div class="row wrap">${projects(g.projects)}</div><h3>公开来源</h3>${sourceList(x.sources)}</article>`;
 }
 function comparePage(){
  return `<section class="panel panel-pad"><h2>先比较改了哪里，再比较好坏。</h2><p>同轴也可能改动不同部位；不同轴往往可以叠加。表格列的是设计取舍，不是未经实验的胜负榜。</p><div class="arch-three">${compare.map((id,i)=>`<label>候选 ${i+1}<select class="field arch-compare-select" data-slot="${i}">${architectures.map(x=>`<option value="${x.id}" ${x.id===id?'selected':''}>${e(x.name)}</option>`).join('')}</select></label>`).join('')}</div><div id="architecture-comparison">${comparison()}</div></section>`;

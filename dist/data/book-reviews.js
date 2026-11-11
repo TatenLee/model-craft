@@ -17,6 +17,7 @@ export const bookReviews={
  'training/growth':['运行生命周期脚本，保存 base/mixed/domain_only/task_demo 和 report.json，重载快照复算 NLL。','只改 --domain-share，在不同目录保留分域表；检查两个分支父节点与新增预算相同。','提交“事实→解释→边界→下一步”；说明计数器为什么不能替代真实 Transformer SFT 或 RL。'],
  'systems/world':['从 persistence 基线开始，定义状态/动作/时间对齐，再训练一个低维转移模型。','固定真实前缀，比较单步 teacher-forced 和自由运行 1/4/8 步误差，不把真实未来接回。','比较像素、latent 和表示预测的可观测信息；为 JEPA 写防塌缩与下游任务验证问题。'],
  'systems/memory':['隐藏速度，用相同 partial observation 比较无历史与带历史模型，解释缺失信息来自哪里。','验证整段/分块 state 输出一致、episode reset 生效、detach 切梯度而不清状态。','在公开源码或授权本地仓库追踪 sampler→batch→forward→loss→optimizer→checkpoint，区分支持与启用。'],
+ 'systems/simulation':['为虚构两居室提交资产、布局、碰撞、机器人尺寸和任务契约，结合 WorldSimReady-Home 官方卡片区分场景包和任务记录。','运行栅格导航得到原路线、绕行和不可达三种结果；说明机器人变宽后需更新哪些约束。','把同一仿真回合分别组织成世界模型、BC、RL 样本，给出独立户型划分与真实迁移验证计划。'],
  'systems/robot':['从示范动作建立行为克隆基线，明确连续/离散动作单位与控制频率。','在固定环境比较直接策略、随机动作与基于世界模型的规划，报告任务成功和动作成本。','注入模型预测误差或传感器噪声，解释为什么离线动作误差小仍可能闭环失败。'],
  'systems/agents':['定义工具 schema、request_id、目标、verified 与失败返回，测试过期响应和错误目标。','运行两目标闭环与 stuck 故障，确认任务状态正确推进并在预算内停止。','将检索上下文、任务状态与参数训练分别标注；规则大脑结果不能冒充通用 LLM Agent 能力。'],
  'engineering/reliable':['故意构造 label 错位、全零 mask 或验证泄漏，按数据→实现→优化顺序定位。','给定模型/长度/批量，估算参数、梯度、状态与激活开销，再测实际峰值。','为 MMLU、MMMU、MMStar 和任务评测各写考察对象、计分方式与不能证明的能力。'],

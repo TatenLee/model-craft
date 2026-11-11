@@ -1,3 +1,4 @@
+import {termTeaching} from './concept-guide-ui.js';
 import {escapeHTML as e} from './state.js';
 
 export function weekSchedule(week){
@@ -8,7 +9,7 @@ export function lessonBody(l,allLessons){
  const prerequisites=l.prerequisites.map(id=>allLessons.find(x=>x.id===id)).filter(Boolean);
  return `<div class="lesson-start callout"><strong>先确认起点</strong><p>${prerequisites.length?'这一课接着以下内容讲；不熟悉时可以先返回：':'会阅读简单变量、列表和循环就能开始。无需先学大模型缩写，也不用先补一门数学课。'}</p>${prerequisites.map(p=>`<a class="text-link" href="#/lesson/${p.id}">${e(p.title)} →</a>`).join('')}<p>建议分三次学：① 新词和前半段讲解；② 手算与代码；③ 引导练习和检查。不会时先看提示，参考解析用于帮助理解。</p></div>
  <section class="reading-section"><h2>学完这一课，你能</h2><ul>${l.objectives.map(o=>`<li>${e(o)}</li>`).join('')}</ul></section>
- <section class="reading-section" id="lesson-terms" tabindex="-1"><h2>本课新词：先把含义讲清楚</h2><dl class="lesson-terms">${l.terms.map(t=>`<div><dt>${e(t.name)}</dt><dd>${e(t.meaning)}<p><b>具体例子：</b>${e(t.example)}</p></dd></div>`).join('')}</dl></section>
+ <section class="reading-section" id="lesson-terms" tabindex="-1"><h2>本课新词：先把含义讲清楚</h2><dl class="lesson-terms">${l.terms.map(termTeaching).join('')}</dl></section>
  ${l.sections.map((s,i)=>`<section class="reading-section lesson-step" id="lesson-step-${i}" tabindex="-1"><h2>${e(s.title)}</h2>${s.body.map(p=>`<p>${e(p)}</p>`).join('')}</section>`).join('')}
  <section class="reading-section worked-example" id="lesson-worked" tabindex="-1"><span class="badge">完整推演</span><h2>${e(l.worked.title)}</h2><ol>${l.worked.steps.map(s=>`<li>${e(s)}</li>`).join('')}</ol><p class="takeaway">${e(l.worked.takeaway)}</p></section>
  <section class="reading-section" id="lesson-code" tabindex="-1"><h2>${e(l.example.title)}</h2><p>本课示例只用 Python 标准库，可直接在网页运行。先保持原样，对照输出，再只改一个值做观察。</p><pre><code>${e(l.example.code)}</code></pre><a class="btn btn-primary lesson-run" href="#/code/lesson-${l.id}">运行并修改本课示例 →</a><h3>原始代码的预期输出</h3><pre class="expected-output">${e(l.example.output)}</pre><p>${e(l.example.explanation)}</p></section>

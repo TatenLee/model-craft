@@ -21,7 +21,7 @@ const catalog={lessons,exercises,questions,days};
 
 test('six volumes form a reachable, stable book with complete old-lesson and lifecycle coverage',()=>{
  for(const v of bookVolumes)for(const c of v.chapters)assert.equal(bookReviews[v.id+'/'+c.id]?.length,3);
- assert.equal(bookVolumes.length,6);assert.equal(bookSections.length,74);
+ assert.equal(bookVolumes.length,6);assert.equal(bookSections.length,77);
  assert.equal(new Set(bookSections.map(s=>s.key)).size,bookSections.length);
  assert.deepEqual(new Set(bookSections.filter(s=>s.kind==='lesson').map(s=>s.source)),new Set(lessons.map(l=>l.id)));
  assert.deepEqual(new Set(bookSections.filter(s=>s.kind==='unit').map(s=>s.source)),new Set(bookUnits.map(u=>u.id)));

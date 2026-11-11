@@ -66,7 +66,7 @@ test('day pages, walkthrough, feedback, sample/custom/submit modes and retained 
  const input=(selector,value)=>{node(selector).value=value;node(selector).dispatchEvent(new w.Event('input',{bubbles:true}));};
  const saved=()=>JSON.parse(w.localStorage.getItem(STORAGE_KEY));
  for(const d of days){await nav('day/'+d.id);assert.equal(node('h1').textContent,d.title);assert.equal(w.document.querySelectorAll('.daily-question').length,d.checks.length);assert.equal(node('#code-editor').dataset.exercise,d.exerciseId);}
- await nav('code');assert.equal(w.document.querySelectorAll('.practice-card').length,56+projectExercises.length+architectureExercises.length+journeyExercises.length+bookExercises.length);
+ await nav('code');assert.equal(w.document.querySelectorAll('.practice-card:not(.concept-example-card)').length,56+projectExercises.length+architectureExercises.length+journeyExercises.length+bookExercises.length);
  const d=days[1],ex=dailyChallenges[0];await nav('day/'+d.id);
  assert.equal(node('[data-action="complete-day"]').disabled,true);
  click('[data-action="trace-next"]');assert.equal(node('#trace-count').textContent,'2 / 3');

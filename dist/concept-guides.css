@@ -1,0 +1,35 @@
+/* Shared teaching blocks use semantic colors in both themes. */
+.concept-guide{font-size:15px;line-height:1.95;overflow-wrap:anywhere;min-width:0}
+.concept-guide>section{margin:26px 0;padding-top:20px;border-top:1px solid var(--line)}
+.concept-guide>section:first-child{margin-top:12px}
+.concept-guide h3{font-size:17px;line-height:1.5;margin:0 0 10px;color:var(--ink)}
+.concept-guide h4{font-size:15px;line-height:1.6;margin:0 0 8px}
+.concept-guide p{margin:10px 0}
+.concept-guide ol{padding-left:24px;margin:12px 0}
+.concept-guide li{padding-left:5px;margin-bottom:13px}
+.analogy-boundary{padding:12px 16px;border-left:3px solid var(--green);background:var(--green-soft);font-size:14px}
+.concept-tradeoffs{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.concept-tradeoffs>div{min-width:0}
+.concept-table-scroll{overflow-x:auto;max-width:100%;margin:12px 0}
+.concept-comparison table{border-collapse:collapse;min-width:420px;width:100%;font-size:14px;text-align:left}
+.concept-comparison td,.concept-comparison th{padding:12px;vertical-align:top;border:1px solid var(--line)}
+.concept-comparison thead{background:var(--green-soft)}
+.concept-comparison th:first-child{width:22%}
+.concept-run article{border:1px solid var(--line);border-radius:12px;padding:18px;margin:12px 0}
+.concept-self-check details{border:1px solid var(--line);border-radius:8px;padding:12px 16px}
+.term-teaching{min-width:0}
+.term-teaching dd{margin-left:0;min-width:0}
+.term-motivation{padding-left:14px;border-left:3px solid var(--green)}
+.term-deep-dive{margin:18px 0;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--white)}
+.term-deep-dive>summary{font-weight:600;line-height:1.8;cursor:pointer;color:var(--green)}
+.term-deep-dive[open]>summary{padding-bottom:12px;border-bottom:1px solid var(--line)}
+.concept-example-page{max-width:1100px;margin:0 auto}
+.concept-example-page>.panel{margin-top:24px}
+.concept-example-page pre{overflow-x:auto}
+@media(max-width:650px){.concept-tradeoffs{grid-template-columns:1fr;gap:10px}.term-deep-dive{padding:12px}.concept-guide{font-size:14px}.concept-guide li{padding-left:0}.concept-run article{padding:12px}}
+
+.learning-terms{display:block}
+.learning-terms>.term-teaching{padding:18px 0;border-bottom:1px solid var(--line)}
+.lesson-terms .concept-guide p{font-size:15px;line-height:1.95}
+.term-teaching:focus-visible{outline:2px solid var(--green);outline-offset:5px}
+@media(max-width:650px){.lesson-terms .concept-guide p{font-size:14px}}

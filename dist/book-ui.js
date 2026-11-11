@@ -1,3 +1,6 @@
+import {guideIdsForTerm} from './data/concept-guides/terms.js';
+import {conceptExamples} from './data/concept-examples.js';
+import {termTeaching} from './concept-guide-ui.js';
 import {bookReviews} from './data/book-reviews.js';
 import {bookVolumes,bookSections,bookSectionByKey,bookHref,lessonBookSection,sourceBookSection,bookProjectMap,bookMechanismMap,bookJourneyMap} from './data/book.js';
 import {bookMaterial} from './book-content.js';
@@ -33,8 +36,8 @@ function chapterReview(vid,cid){
  if(vid==='training'&&cid==='posttrain')return ['用相同输入设计示范、偏好对与可验证奖励，说明它们分别提供什么信号。','比较 SFT/偏好/RL/蒸馏的适用条件；手算一条 mask、一个优势和一次教师信号。','提交后训练前后分层评测表：格式、正确性、偏好、保留能力与推理成本。'];
  return tasks[vid];
 }
-function newBody(m){return `<section id="book-terms" data-book-anchor tabindex="-1"><h2>先认识本节的新词</h2><dl class="lesson-terms">${m.terms.map(t=>`<div><dt>${e(t.name)}</dt><dd>${e(t.meaning)}</dd></div>`).join('')}</dl></section>${m.steps.map((st,i)=>`<section id="book-step-${i}" data-book-anchor tabindex="-1"><h2>${e(st.title)}</h2>${st.body.map(p=>`<p>${e(p)}</p>`).join('')}</section>`).join('')}<section id="book-worked" data-book-anchor tabindex="-1"><span class="badge">完整推演</span><h2>跟着一个具体例子走</h2><ol>${m.worked.map(t=>`<li>${e(t)}</li>`).join('')}</ol></section><section id="book-practice" data-book-anchor tabindex="-1"><h2>带着目标动手</h2><p>${e(m.practice.action)}</p>${m.command?`<p class="small muted">下载实战包后，在解压根目录或仓库根目录运行：</p><pre><code>${e(m.command)}</code></pre><a class="btn btn-small" href="./downloads/model-craft-projects.zip" download>下载实战代码</a>`:''}${m.localCode?`<p>本地 PyTorch 示例：</p><pre><code>${e(m.localCode)}</code></pre><details><summary>对照原始输出</summary><pre>${e(m.expected)}</pre></details>`:''}<details><summary>怎样判断做对了</summary><p>${e(m.practice.expected)}</p></details><details><summary>卡住时排查</summary><p>${e(m.practice.trouble)}</p></details><div class="row wrap">${mapLinks(m.links)}</div></section>`;}
-function foundationBody(m){const f=m.foundation;return `<section id="book-terms" data-book-anchor tabindex="-1"><h2>先认识新词</h2><dl class="lesson-terms">${f.terms.map(([name,meaning])=>`<div><dt>${e(name)}</dt><dd>${e(meaning)}</dd></div>`).join('')}</dl></section>${f.sections.map((s,i)=>`<section id="book-step-${i}" data-book-anchor tabindex="-1"><h2>${e(s.title)}</h2>${s.paragraphs.map(p=>`<p>${e(p)}</p>`).join('')}</section>`).join('')}<section id="book-worked" data-book-anchor tabindex="-1"><h2>推演与代码</h2><pre><code>${e(f.example.code)}</code></pre><pre>${e(f.example.output)}</pre><ol>${f.worked.map(p=>`<li>${e(p)}</li>`).join('')}</ol></section><section id="book-practice" data-book-anchor tabindex="-1"><h2>逐步动手</h2><ol>${f.practice.map(p=>`<li>${e(typeof p==='string'?p:p.action)}</li>`).join('')}</ol><p>${e(f.recovery)}</p></section>`;}
+function newBody(m){return `<section id="book-terms" data-book-anchor tabindex="-1"><h2>先认识本节的新词</h2><p class="small muted">先读含义与为什么需要；展开每个词，跟着类比、算例和使用步骤理解，再做自查。</p><dl class="lesson-terms">${m.terms.map(termTeaching).join('')}</dl></section>${m.steps.map((st,i)=>`<section id="book-step-${i}" data-book-anchor tabindex="-1"><h2>${e(st.title)}</h2>${st.body.map(p=>`<p>${e(p)}</p>`).join('')}</section>`).join('')}<section id="book-worked" data-book-anchor tabindex="-1"><span class="badge">完整推演</span><h2>跟着一个具体例子走</h2><ol>${m.worked.map(t=>`<li>${e(t)}</li>`).join('')}</ol></section><section id="book-practice" data-book-anchor tabindex="-1"><h2>带着目标动手</h2><p>${e(m.practice.action)}</p>${m.command?`<p class="small muted">下载实战包后，在解压根目录或仓库根目录运行：</p><pre><code>${e(m.command)}</code></pre><a class="btn btn-small" href="./downloads/model-craft-projects.zip" download>下载实战代码</a>`:''}${m.localCode?`<p>本地 PyTorch 示例：</p><pre><code>${e(m.localCode)}</code></pre><details><summary>对照原始输出</summary><pre>${e(m.expected)}</pre></details>`:''}<details><summary>怎样判断做对了</summary><p>${e(m.practice.expected)}</p></details><details><summary>卡住时排查</summary><p>${e(m.practice.trouble)}</p></details><div class="row wrap">${mapLinks(m.links)}</div></section>`;}
+function foundationBody(m){const f=m.foundation;return `<section id="book-terms" data-book-anchor tabindex="-1"><h2>先认识新词</h2><dl class="lesson-terms">${f.terms.map(([name,meaning])=>termTeaching({name,meaning})).join('')}</dl></section>${f.sections.map((s,i)=>`<section id="book-step-${i}" data-book-anchor tabindex="-1"><h2>${e(s.title)}</h2>${s.paragraphs.map(p=>`<p>${e(p)}</p>`).join('')}</section>`).join('')}<section id="book-worked" data-book-anchor tabindex="-1"><h2>推演与代码</h2><pre><code>${e(f.example.code)}</code></pre><pre>${e(f.example.output)}</pre><ol>${f.worked.map(p=>`<li>${e(p)}</li>`).join('')}</ol></section><section id="book-practice" data-book-anchor tabindex="-1"><h2>逐步动手</h2><ol>${f.practice.map(p=>`<li>${e(typeof p==='string'?p:p.action)}</li>`).join('')}</ol><p>${e(f.recovery)}</p></section>`;}
 function reader(s,v,c,state,exercises,editor){
  const m=bookMaterial(s),index=bookSections.indexOf(s),prev=bookSections[index-1],next=bookSections[index+1],ex=exercises.find(x=>x.id===m.exerciseId),r=state.book.records[s.key]||{},answers=bookAnswers(s,state),parent=`${v.id}/${c.id}`;
  const reading=m.lesson?canonicalLinks(lessonBody(m.lesson,lessons)):m.foundation?foundationBody(m):newBody(m);
@@ -45,10 +48,14 @@ export function bookCompletion(s,state,exercises){const status=bookStatus(s,stat
 export function bindBook(key,state,exercises,save,{restore=true}={}){
  const s=bookSectionByKey.get(key);if(!s)return ()=>{};
  const controller=new window.AbortController(),signal=controller.signal,record=bookRecord(state,key),m=bookMaterial(s),reader=document.querySelector('.book-reader');
+ const panels=[...reader.querySelectorAll('[data-concept-panel]')];
+ if(Array.isArray(record.openConcepts))panels.forEach(p=>{p.open=record.openConcepts.includes(p.dataset.conceptPanel);});
+ reader.addEventListener('toggle',ev=>{if(!ev.target.matches('[data-concept-panel]'))return;record.openConcepts=panels.filter(p=>p.open).map(p=>p.dataset.conceptPanel);save();},{capture:true,signal});
  const savedAnchor=record.anchor,savedOffset=record.offset;record.openedAt=new Date().toISOString();state.book.lastRead=key;save();
+ reader.querySelectorAll('.term-teaching').forEach((el,i)=>{el.id='book-term-'+i;el.setAttribute('data-book-anchor','');el.tabIndex=-1;});
  reader.querySelectorAll('.reading-section[id]').forEach(el=>el.setAttribute('data-book-anchor',''));
  const anchors=[...reader.querySelectorAll('[data-book-anchor]')],toc=document.getElementById('book-local-toc');
- toc.innerHTML=anchors.filter(el=>el.id!=='book-start').map(el=>`<button type="button" data-book-jump="${el.id}">${e(el.querySelector('h2')?.textContent||el.id)}</button>`).join('');
+ toc.innerHTML=anchors.filter(el=>el.id!=='book-start').map(el=>`<button type="button" data-book-jump="${el.id}">${e(el.querySelector('h2')?.textContent||el.querySelector('dt')?.textContent||el.id)}</button>`).join('');
  // Anchor + relative offset survives changes above the paragraph better than page scroll alone.
  let timer=null,restoring=true,closed=false;
  const capture=()=>{if(restoring||closed)return;const pos=window.scrollY||0;let chosen=anchors[0];for(const el of anchors){if(el.getBoundingClientRect().top<=100)chosen=el;}record.anchor=chosen?.id||'book-start';record.offset=Math.max(0,Math.min(6000,pos-(chosen?.getBoundingClientRect().top+pos||0)));save();};
@@ -64,12 +71,14 @@ export function bindBook(key,state,exercises,save,{restore=true}={}){
 export function bookResourceContext(page,id){
  if(['book','learn','settings','notebook'].includes(page))return '';
  let target=null;
+ const conceptId=page==='concepts'?id:page==='code'?conceptExamples.find(ex=>ex.id===id)?.sourceConceptId:null;
+ if(conceptId)target=bookSections.find(section=>{const m=bookMaterial(section);return (m.lesson?.terms||m.terms||[]).some(t=>guideIdsForTerm(t.name).includes(conceptId));});
  if(page==='lesson')target=lessonBookSection(id);
  if(page==='day'){const d=days.find(d=>d.id===id);if(d)target=lessonBookSection(d.lessonId||`w${d.week}-l${Math.min(3,Math.ceil(d.day/2))}`);}
  if(page==='foundations')target=sourceBookSection('foundation',id);
  if(page==='journey'){const i=journeyStages.findIndex(s=>s.id===id);target=bookSectionByKey.get(bookJourneyMap[i]);}
  if(page==='projects'){const work=id.replace(/^workshop-/,'').split('/')[0];target=bookSectionByKey.get(bookProjectMap[work]);if(!target)target=bookSectionByKey.get(bookMechanismMap[id]);}
  if(page==='architectures')target=bookSectionByKey.get('engineering/architecture/architecture-choice');
- if(page==='code'){const lid=id.startsWith('lesson-')?id.slice(7):null;target=lid?lessonBookSection(lid):bookSections.find(s=>bookMaterial(s).exerciseId===id);}
+ if(page==='code'){const lid=id.startsWith('lesson-')?id.slice(7):null;target=target||(lid?lessonBookSection(lid):bookSections.find(s=>bookMaterial(s).exerciseId===id));}
  return `<section class="panel panel-pad book-resource-context"><span class="eyebrow">全书中的位置</span><p>${target?`${e(target.volumeTitle)} / ${e(target.chapterTitle)}。这份材料服务于：${e(target.title)}。`:'这里是按需查阅的资料或案例。先从书籍目录定位正在解决的问题，再选择所需材料。'}</p><div class="row wrap">${link(target?.key||'',target?'返回对应章节 →':'打开全书目录 →','btn btn-small btn-primary')}${link('','查看完整目录','btn btn-small')}</div></section>`;
 }

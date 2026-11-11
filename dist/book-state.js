@@ -1,3 +1,4 @@
+import {guideIdsForTerm,conceptPanelKey} from './data/concept-guides/terms.js';
 import {bookSections,bookSectionByKey} from './data/book.js';
 import {bookMaterial} from './book-content.js';
 import {codeAccepted} from './daily-state.js';
@@ -7,9 +8,12 @@ export function normalizeBook(value){
  if(bookSectionByKey.has(value?.lastRead))out.lastRead=value.lastRead;
  for(const section of bookSections){
   const r=value?.records?.[section.key];if(!r||typeof r!=='object'||Array.isArray(r))continue;
-  const answers={};bookMaterial(section).checks.forEach((q,i)=>{const n=r.answers?.[i];if(Number.isInteger(n)&&n>=0&&n<q.options.length)answers[i]=n;});
+  const material=bookMaterial(section),terms=material.lesson?.terms||material.terms||[];
+  const validPanels=new Set(terms.flatMap(t=>guideIdsForTerm(t.name).map(id=>conceptPanelKey(t.name,id))));
+  const answers={};material.checks.forEach((q,i)=>{const n=r.answers?.[i];if(Number.isInteger(n)&&n>=0&&n<q.options.length)answers[i]=n;});
   const text=(v,n=50)=>typeof v==='string'?v.slice(0,n):'';
   out.records[section.key]={openedAt:text(r.openedAt),readAt:text(r.readAt),anchor:typeof r.anchor==='string'&&/^(book|lesson)-[a-z0-9-]{1,70}$/.test(r.anchor)?r.anchor:'book-start',offset:Number.isFinite(r.offset)?Math.max(0,Math.min(6000,r.offset)):0,note:text(r.note,12000),answers};
+  if(Array.isArray(r.openConcepts))out.records[section.key].openConcepts=[...new Set(r.openConcepts.filter(key=>validPanels.has(key)))];
  }
  if(out.lastRead&&!out.records[out.lastRead])out.lastRead='';
  return out;

@@ -1,0 +1,48 @@
+// Explicit term binding avoids accidental substring matches (e.g. PT in checkpoint).
+const groups=[
+ ['worldsimready',['WorldSimReady']],['simready',['SimReady']],['scene-layout',['户型与场景图','OpenUSD']],['scene-physics',['碰撞体与关节']],['navmesh',['占据栅格与 NavMesh']],['navigation',['导航任务','SPL']],['simulator',['仿真器与环境']],['domain-randomization',['域随机化','合成数据']],['sim2real',['Sim-to-Real']],
+ ['model-contract',['输入 x','预测','标签／目标 y','模型 model','样本 sample','预测 prediction 与目标 target']],
+ ['parameters',['参数 w、b','参数 parameter','容量']],['python-function',['函数']],['python-list',['列表与批次']],
+ ['loss',['误差 e','损失 loss','目标']],['gradient',['梯度','梯度 gradient']],['learning-rate',['学习率 lr','学习率 learning rate','学习率日程']],['average',['平均','有效权重']],
+ ['data-leakage',['数据泄漏','评测污染','去重']],['generalization',['泛化','泛化 generalization','分布偏移 distribution shift']],
+ ['metric-benchmark',['基线','基线 baseline','计数基线','验证协议','主指标 primary metric','metric 指标','benchmark 评测基准','回归评测','能力门槛','保留集']],
+ ['data-splits',['训练集','验证集','测试集']],
+ ['ablation',['消融','消融 ablation','控制变量','重复种子','公平预算','研究问题','假设 hypothesis','否定条件','可证伪假设','过拟合小样本测试']],
+ ['tensor',['标量 / 向量 / 矩阵','shape','tensor 张量与 shape 形状']],['mlp',['MLP']],['activation',['激活函数']],['autograd',['计算图','计算图 computation graph']],
+ ['gradient-accumulation',['梯度累积']],['training-inference',['训练','推理','训练步 step']],['optimizer',['优化器 optimizer','AdamW']],
+ ['training-recipe',['模型系统','结构','训练配方','训练阶段','基座','initialize 初始化','resume 续训','入口 entrypoint','配置覆盖','运行证据','操作定义','来源范围','数据契约','兼容性','建模选择','训练选择']],
+ ['tokenizer',['token','tokenizer 分词器']],['embedding',['embedding 嵌入']],['attention',['Attention 注意力','Q、K、V','信息混合']],['softmax',['softmax','logits']],
+ ['causal-mask',['causal mask 因果掩码']],['ar',['AR 自回归','视觉 AR']],['teacher-forcing',['teacher forcing 真实历史训练']],['transformer',['Transformer']],['decoder-only',['Decoder-only']],
+ ['vision-tower',['视觉塔 vision tower']],['vit',['patch 图像块','ViT 视觉 Transformer']],['connector',['connector/projector 连接层','连接层 projector']],
+ ['contrastive',['对比学习 contrastive learning']],['clip',['CLIP']],['dino',['DINO']],['ema',['教师—学生与 EMA']],
+ ['latent-codec',['latent 潜变量/隐表示','codec 编码解码模块']],['vae',['VAE 变分自编码器']],['vq',['VQ 向量量化']],['lsd',['LSD 项目术语']],
+ ['diffusion',['Diffusion 扩散模型','噪声时间 t','去噪目标']],['sampling',['采样器 sampler','约束解码']],
+ ['flow-matching',['Flow Matching 流匹配']],['numerical-integration',['速度场 vector field','数值积分']],['dit',['DiT']],
+ ['psnr',['PSNR 峰值信噪比']],['fid',['FID']],['image-reward',['ImageReward']],['cfg',['CFG 无分类器引导']],
+ ['video-modeling',['视频片段 clip','时空 token','时间一致性']],['multimodal-alignment',['对齐','多模态指令']],
+ ['pretraining',['预训练','预训练 pretraining']],['midtraining',['中训练','能力缺口','领域适配']],['posttraining',['后训练','后训练 post-training','生成适配']],
+ ['continual-pretraining',['持续预训练','CPT']],['self-supervised',['自监督','自监督 self-supervised']],['data-mixture',['数据配比','数据配比 data mixture']],
+ ['cross-entropy',['交叉熵 cross entropy','NLL']],['loss-mask',['loss mask 损失掩码','loss mask 损失遮挡','监督区域']],['perplexity',['PPL 困惑度']],['checkpoint',['checkpoint 检查点']],
+ ['context-window',['上下文窗口','长度泛化']],['forgetting',['灾难性遗忘']],
+ ['task-contract',['任务契约','指令遵循','聊天模板 chat template']],['preference-pair',['示范','偏好对','偏好 preference','任务示范适配']],
+ ['sft',['SFT，Supervised Fine-Tuning，监督微调']],['reward',['奖励']],['reward-model',['奖励模型 RM']],['reward-hacking',['奖励黑客']],
+ ['rlhf',['RLHF']],['dpo',['DPO']],['rlvr',['RLVR']],['ppo',['PPO']],['grpo',['GRPO']],['policy-gradient',['策略梯度','优势 advantage']],
+ ['distillation',['蒸馏','知识蒸馏 distillation']],['opd',['On-policy distillation / OPD']],['mopd',['MOPD']],
+ ['bc',['行为克隆 BC','行为克隆 BC，Behavior Cloning']],['freezing',['冻结','可训练参数','全量微调','更新范围']],
+ ['lora',['LoRA，Low-Rank Adaptation，低秩适配','rank r']],['qlora',['QLoRA']],['discounted-return',['奖励 r 与回报 G']],
+ ['observation',['状态 s','状态 state','观测 observation','动作 action']],['policy',['动作 a 与策略 π','策略 policy']],
+ ['experiment-lineage',['实验分叉','实验谱系','适用范围','观测事实','机制解释','数据账本','失败分类','证据链','消融追问']],
+ ['world-model',['世界模型 world model']],['action-conditioning',['动作条件 action conditioning','条件变量']],
+ ['jepa',['JEPA，Joint-Embedding Predictive Architecture','上下文编码器与目标编码器']],['collapse',['stop-gradient 停止梯度','表示塌缩 collapse']],
+ ['rollout',['rollout','rollout 连续展开','horizon 预测长度','误差累积','保持状态基线 persistence']],
+ ['kv-cache',['KV cache']],['recurrent-state',['递归状态 recurrent state']],['linear-attention',['线性注意力']],['kda',['KDA，Kimi Delta Attention']],
+ ['detach-reset',['detach','reset','chunk 数据块']],['tbptt',['TBPTT 截断时间反向传播']],
+ ['closed-loop',['闭环 closed loop']],['vla',['VLA，Vision-Language-Action','动作表示']],['diffusion-policy',['Diffusion Policy','action chunk 动作块','滚动时域执行']],
+ ['planning',['规划 planning','MPC 模型预测控制']],['embodied-model',['具身模型']],['embodied-brain',['具身大脑']],['agentic',['Agent 循环','工具契约']],['rag',['RAG']],
+ ['gradient-clip',['梯度范数']],['mixed-precision',['非有限值','混合精度 mixed precision']],['microbatch-ddp',['micro-batch 微批次']],['throughput',['吞吐 throughput','执行优化']],
+ ['mmlu',['MMLU']],['mmmu',['MMMU']],['mmstar',['MMStar']],['reproducibility',['可复现性 reproducibility','最小复现','环境清单','恢复审计']],['moe',['MoE 混合专家']],['ssm',['SSM 状态空间模型']]
+];
+export const termGuideMap=Object.fromEntries(groups.flatMap(([id,names])=>names.map(n=>[n,[id]])));
+Object.assign(termGuideMap,{'warmup 与梯度裁剪':['learning-rate','gradient-clip'],'奖励 reward 与奖励模型':['reward','reward-model'],'PPO 与 GRPO':['ppo','grpo'],'PPO / GRPO':['ppo','grpo'],'DDP 与 FSDP':['microbatch-ddp','fsdp']});
+export const guideIdsForTerm=name=>termGuideMap[name]||[];
+export const conceptPanelKey=(name,id)=>`${name}::${id}`;
