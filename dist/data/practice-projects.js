@@ -8,12 +8,19 @@ project('vision-baseline','训练一个能解释错误的图像分类器','训�
  A('Hugging Face 数据集卡','https://huggingface.co/datasets/uoft-cs/cifar10','查样本和类别；HF Parquet 不能直接传给本项目的二进制读取器。')],
  'https://docs.pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html',
  [['模型与参数','#/book/common/predict/model'],['训练/验证划分','#/concepts/data-splits'],['交叉熵','#/concepts/cross-entropy']],
- [M('验收数据，再讨论网络','下载官方 binary 压缩包到 .openai/local/data/。运行 inspect，观察 shape、数值范围和每类数量；查一条记录如何把 3072 个像素还原成 3×32×32。','在 read_data 中追踪标签字节和三个颜色平面；在 split_indices 中确认固定 80/20 开发划分。保留官方 test 到最后。','数据检查输出训练记录数、十类计数和 SHA256。train/validation 的原始索引应不相交；这一步没有训练。','找不到 data_batch_1.bin 多半下载了 Python 版或 HF Parquet；换成 binary version，不要改代码跳过文件检查。','保存 inspect 输出、文件来源与哈希，写出输入、标签、训练/验证/测试各自的用途。'),
+ [M('验收数据，再讨论网络','先执行下方环境准备命令，在下载页选择 binary version，把压缩包放进 .openai/local/data/，再运行 inspect。每张图片有红绿蓝三个通道，每通道 32×32 个像素；一条记录共 3072 个像素值加一个类别字节。','在 read_data 中追踪标签字节和三个颜色平面；在 split_indices 中确认固定 80/20 开发划分。保留官方 test 到最后。','预期 shape=[50000,3,32,32]，像素为 uint8 的 0–255，十类各 5000 条。脚本另记录 SHA256。训练/验证索引不相交；这一步没有训练，也没有改变模型参数。','找不到 data_batch_1.bin 多半下载了 Python 版或 HF Parquet；换成 binary version，不要改代码跳过文件检查。','保存 inspect 输出、文件来源与哈希，写出输入、标签、训练/验证/测试各自的用途。'),
  M('先看不学习与线性模型能到哪里','先运行 linear 5 个 epoch、5000 训练样本与 1000 验证样本。report 同时保存随机初始化和多数类基线。','读 tensor 的归一化和 Classifier 的 Linear(3072,10)；解释为什么输出是十个分数，不是直接回归类别编号。','history 同时包含 train/val loss 和 accuracy。目标是建立可信基线，不预先承诺某个准确率。','loss 不下降先检查有限数值、标签范围和梯度；验证差先检查划分与容量，而不是立刻延长到几百轮。','记录四项基线值、样本数和运行时长。保留原 report.json，不只复制最好的一行。'),
  M('只换 CNN，检验局部空间结构是否有帮助','使用相同数据子集、seed、epoch 和 batch 跑 CNN，输出到新目录。解释卷积读取哪些邻域和池化改变哪些形状。','自己把一层卷积的通道数改为 16，跟着修后续输入通道；运行前列出每层 shape 与参数变化。','比较验证 loss、混淆矩阵与运行成本；相同 epoch 不代表相同 FLOPs，报告容量差异。','把 32 改 16 后报错，优先检查下层 Conv2d 的输入通道；若 flatten 维度错，手算池化后的 H/W。','提交线性/CNN/改通道三组表。按 README 的 --error-gallery 命令生成错判图册，并选出两类易混图片解释模型缺什么。'),
  M('故意制造坏数据，练习诊断','运行 --shuffle-labels，只有训练标签打乱，验证标签保持真实。再做 128 样本小集训练，观察能否记住。','先写预测：训练误差可能下降，真实验证为什么不一定改善？只改变标签，不改架构和划分。','标签打乱是负对照。小样本能拟合证明学习链路有效；不能证明真实任务泛化。','训练集很好、验证差，先区分随机标签、过拟合与分布差异。不要把所有失败都归因学习率。','提交你事前的预测、实际曲线和被实验支持/否定的解释。'),
  M('恢复、独立评估与交付','从 last.pt 续训到更大的总 epoch，使用新输出目录。配置锁定后再在官方 test 上评估一次。','在 evaluate 的 confusion 索引处添加“每类召回率”，对支持数为 0 的类明确返回空值；用手算小矩阵验证。','重载权重的验证结果应一致。CPU 确定性检查已提供；GPU 数值与性能需在目标环境实测。','恢复时数据哈希或学习率变化会拒绝续训。想改超参数应当标为新分支，不冒充精确恢复。','交付 checkpoint、配置、数据指纹、对照、失败样例和复现命令。说明这只是入门分类项目，不是大模型预训练。')],
- {status:'本地训练器已实现 · CPU 合成夹具验证；真实 CIFAR 成绩待你运行',local:'projects/real-vision/README.md',command:`python projects/real-vision/train.py inspect --data .openai/local/data/cifar-10-binary.tar.gz
+ {status:'本地训练器已实现 · CPU 合成夹具验证；真实 CIFAR 成绩待你运行',local:'projects/real-vision/README.md',command:`# 在仓库根目录或下载包的解压目录中执行
+mkdir -p .openai/local/data
+python3 -m venv .openai/local/vision-env
+source .openai/local/vision-env/bin/activate
+python -m pip install torch numpy
+python -m pip freeze > .openai/local/vision-environment.txt
+# 下载 binary version 到上述 data 目录后，按任务逐条运行
+python projects/real-vision/train.py inspect --data .openai/local/data/cifar-10-binary.tar.gz
 python projects/real-vision/train.py train --data .openai/local/data/cifar-10-binary.tar.gz --arch linear --epochs 5 --out .openai/local/real-vision/linear
 python projects/real-vision/train.py train --data .openai/local/data/cifar-10-binary.tar.gz --arch cnn --epochs 5 --out .openai/local/real-vision/cnn`}),
 project('language','从零预训练一个小故事语言模型','语言预训练','TinyStories 子集上的 Decoder-only 模型，能够加载 checkpoint 继续生成，并有固定验证集和吞吐报告。','分类器只选标签；接下来让模型预测下一个 token，输出从一个类别变成变长文本。采用 nanoGPT 的清楚实现学习预训练，不从零训练十亿参数。','Mac 跑小模型和数据检查；扩大序列/批量再用 CUDA。','12–20 小时',[
