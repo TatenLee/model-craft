@@ -79,7 +79,7 @@ test('book application navigates, restores paragraphs, saves answers and invalid
  const q=s=>{const el=w.document.querySelector(s);assert.ok(el,s);return el;};
  const nav=async path=>{w.location.hash='#/'+path;await new Promise(r=>w.setTimeout(r,45));await new Promise(r=>w.requestAnimationFrame(r));assert.deepEqual(errors,[]);};
  const saved=()=>JSON.parse(w.localStorage.getItem(STORAGE_KEY));
- assert.match(q('h1').textContent,/实践书/);assert.equal(q('.nav-reference').open,false);
+ assert.match(q('h1').textContent,/先做一个模型/);assert.equal(q('.nav-reference').open,false);
  await nav('book/training');assert.match(q('h1').textContent,/全生命周期/);
  await nav('book/training/posttrain');assert.match(q('h1').textContent,/后训练/);
  const key='training/posttrain/ppo-grpo';await nav('book/'+key);

@@ -43,6 +43,10 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/model-craft-robot-tests"
           "$RUNNER_TEMP/model-craft-robot-tests/bin/python" -m pip install --disable-pip-version-check 'torch>=2.4,<3' --index-url https://download.pytorch.org/whl/cpu
+      - name: Install NumPy for real-data vision checks
+        run: '"$RUNNER_TEMP/model-craft-robot-tests/bin/python" -m pip install --disable-pip-version-check "numpy>=1.26,<3"'
+      - name: Check vision training, deterministic resume and archive reader
+        run: '"$RUNNER_TEMP/model-craft-robot-tests/bin/python" -m unittest discover -s projects/real-vision -p "test_*.py"'
       - name: Check robot interfaces, training, resume and task loop
         working-directory: projects/robot-workbench
         run: '"$RUNNER_TEMP/model-craft-robot-tests/bin/python" -m unittest robot.tests'

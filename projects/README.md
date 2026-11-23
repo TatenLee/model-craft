@@ -1,6 +1,8 @@
 # Model Craft 项目实战
 
-推荐从网页 `#/book` 的六卷书籍目录进入，在章节内选择对应实战。P01–P10 是项目身份，M01–M16 是其中的机制练习；编号不是必修先后顺序。机器人 [robot-workbench/README.md](robot-workbench/README.md) 是第五卷可选综合案例，不要求所有方向先做机器人。
+推荐从网页 `#/practice` 的真实项目路线开始，第一项打开 [real-vision/README.md](real-vision/README.md)，用 CIFAR-10 完成训练与诊断。后续 13 项采用官方工程带练，依项目页面下载数据并记录版本；它们并非都已在这个代码包中实现。需要解释时查 `#/book`。下面保留原机制实验，按当前项目需要选用。
+
+P01–P10 是项目身份，M01–M16 是其中的机制练习；编号不是必修先后顺序。机器人 [robot-workbench/README.md](robot-workbench/README.md) 是第五卷可选综合案例，不要求所有方向先做机器人。
 
 - 第四卷预训练 → P01；后训练与参数适配 → P02/P03。
 - 第三卷视觉/生成 → P04/P05；第五卷世界/记忆/规划 → P06/P07/P08。

@@ -69,7 +69,7 @@ export function bindBook(key,state,exercises,save,{restore=true}={}){
  return ()=>{clearTimeout(timer);capture();closed=true;window.cancelAnimationFrame(restoreFrame);controller.abort();};
 }
 export function bookResourceContext(page,id){
- if(['book','learn','settings','notebook'].includes(page))return '';
+ if(['practice','book','learn','settings','notebook'].includes(page))return '';
  let target=null;
  const conceptId=page==='concepts'?id:page==='code'?conceptExamples.find(ex=>ex.id===id)?.sourceConceptId:null;
  if(conceptId)target=bookSections.find(section=>{const m=bookMaterial(section);return (m.lesson?.terms||m.terms||[]).some(t=>guideIdsForTerm(t.name).includes(conceptId));});
