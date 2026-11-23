@@ -51,7 +51,7 @@ python projects/real-vision/train.py train --data .openai/local/data/cifar-10-bi
 
 逐层 shape：`[B,3,32,32] → [B,32,32,32] → [B,32,16,16] → [B,64,16,16] → [B,64,8,8] → [B,4096] → [B,128] → [B,10]`。
 
-**你改代码**：把第一层输出通道 32 改为 16，同时修改第二层输入通道，另存实验。先写下预期：中间激活与参数减少；质量不一定同方向变化。不要同时改学习率、epoch 和数据。
+**你改代码**：把第一层输出通道 32 改为 16，同时修改第二层输入通道，另存实验。先写下预期：中间激活与参数减少；质量不一定同方向变化。不要同时改学习率、epoch 和数据。保留修改前的代码版本；改通道实验后恢复原 CNN 定义，再加载原 CNN checkpoint。权重形状与模型定义必须匹配。
 
 网页本项目底部可导入 `report.json` 画训练/验证曲线，只在本机读取。`confusion_true_rows_pred_cols` 的行是真实类、列是预测类；`mistakes.subset_index` 是本次验证子集索引，结合 `split_indices.npz` 找回原图。
 
@@ -78,9 +78,9 @@ python projects/real-vision/train.py train --data .openai/local/data/cifar-10-bi
 
 ```bash
 python projects/real-vision/train.py train --data .openai/local/data/cifar-10-binary.tar.gz --arch cnn --epochs 8 --resume .openai/local/real-vision/cnn/last.pt --out .openai/local/real-vision/cnn-resumed
-python projects/real-vision/train.py evaluate --data .openai/local/data/cifar-10-binary.tar.gz --checkpoint .openai/local/real-vision/cnn/best.pt --split validation
+python projects/real-vision/train.py evaluate --data .openai/local/data/cifar-10-binary.tar.gz --checkpoint .openai/local/real-vision/cnn-resumed/best.pt --split validation
 # 选定配置后才运行，并保存输出；不要反复据 test 调参。
-python projects/real-vision/train.py evaluate --data .openai/local/data/cifar-10-binary.tar.gz --checkpoint .openai/local/real-vision/cnn/best.pt --split test
+python projects/real-vision/train.py evaluate --data .openai/local/data/cifar-10-binary.tar.gz --checkpoint .openai/local/real-vision/cnn-resumed/best.pt --split test
 ```
 
 `--epochs 8` 是总轮数，从已保存 5 轮继续到第 8 轮。恢复锁定数据指纹、架构、学习率、seed、batch、子集、标签实验与设备；改变这些应创建明确的新实验。本简单网络没有 dropout/随机增强，每轮排列由 seed+epoch 确定，CPU 恢复等价性有自动测试；这不是所有复杂训练都能省略 RNG 状态的理由。GPU 不承诺位级一致。
