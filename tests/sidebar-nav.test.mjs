@@ -37,7 +37,7 @@ test('module switching, filter, step jumps and folding preserve drafts and activ
  const input=text=>{const el=q('#sidebar-project-search');el.value=text;el.dispatchEvent(new w.Event('input',{bubbles:true}));};
  const nav=async hash=>{w.location.hash=hash;await tick();assert.deepEqual(errors,[]);};
  const visible=()=>[...w.document.querySelectorAll('[data-sidebar-project]')].filter(el=>!el.hidden).map(el=>el.dataset.sidebarProject);
- assert.equal(w.document.querySelectorAll('[data-sidebar-module]').length,2);
+ assert.deepEqual(Array.from(w.document.querySelectorAll('[data-sidebar-module]'),el=>el.dataset.sidebarModule),['book','practice']);
  assert.equal(q('#sidebar-practice-body').hidden,false);assert.equal(q('#sidebar-book-body').hidden,true);assert.equal(w.document.querySelector('.book-sidebar'),null);
  assert.equal(q('.sidebar-project-link[aria-current=page]').getAttribute('href'),'#/practice/vision-baseline');
  const editor=q('#code-editor');editor.value='def class_recall(matrix):\n    return [None for row in matrix]\n';editor.dispatchEvent(new w.Event('input',{bubbles:true}));

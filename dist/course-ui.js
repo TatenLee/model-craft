@@ -5,9 +5,13 @@ export function weekSchedule(week){
  return `<section class="panel weekly-plan"><h3>这一周，每天具体做什么</h3><p>时间是含动手与复盘的预算。每天只有 30 分钟时，可以把一天拆成数次完成，不需要赶日历。</p>${week.schedule.map(d=>`<details class="day-plan"><summary><span>第 ${d.day} 天</span><strong>${e(d.title)}</strong><small>${d.minutes} 分钟</small></summary><p>${e(d.action)}</p><p class="expected"><b>做到什么程度：</b>${e(d.expected)}</p>${d.lessonId?`<a class="text-link" href="#/lesson/${d.lessonId}">打开对应讲解 →</a>`:`<button class="btn btn-small" data-action="week-quiz" data-week="${week.id}">检查本周理解</button>`}</details>`).join('')}</section>`;
 }
 
-export function lessonBody(l,allLessons){
+function weekLessonStart(l,allLessons){
  const prerequisites=l.prerequisites.map(id=>allLessons.find(x=>x.id===id)).filter(Boolean);
- return `<div class="lesson-start callout"><strong>先确认起点</strong><p>${prerequisites.length?'这一课接着以下内容讲；不熟悉时可以先返回：':'会阅读简单变量、列表和循环就能开始。无需先学大模型缩写，也不用先补一门数学课。'}</p>${prerequisites.map(p=>`<a class="text-link" href="#/lesson/${p.id}">${e(p.title)} →</a>`).join('')}<p>建议分三次学：① 新词和前半段讲解；② 手算与代码；③ 引导练习和检查。不会时先看提示，参考解析用于帮助理解。</p></div>
+ return `<div class="lesson-start callout"><strong>先确认起点</strong><p>${prerequisites.length?'这一课接着以下内容讲；不熟悉时可以先返回：':'会阅读简单变量、列表和循环就能开始。无需先学大模型缩写，也不用先补一门数学课。'}</p>${prerequisites.map(p=>`<a class="text-link" href="#/lesson/${p.id}">${e(p.title)} →</a>`).join('')}<p>建议分三次学：① 新词和前半段讲解；② 手算与代码；③ 引导练习和检查。不会时先看提示，参考解析用于帮助理解。</p></div>`;
+}
+// Only the weekly route supplies a week catalog. The book displays its own prerequisites.
+export function lessonBody(l,allLessons){
+ return `${allLessons?weekLessonStart(l,allLessons):''}
  <section class="reading-section"><h2>学完这一课，你能</h2><ul>${l.objectives.map(o=>`<li>${e(o)}</li>`).join('')}</ul></section>
  <section class="reading-section" id="lesson-terms" tabindex="-1"><h2>本课新词：先把含义讲清楚</h2><dl class="lesson-terms">${l.terms.map(termTeaching).join('')}</dl></section>
  ${l.sections.map((s,i)=>`<section class="reading-section lesson-step" id="lesson-step-${i}" tabindex="-1"><h2>${e(s.title)}</h2>${s.body.map(p=>`<p>${e(p)}</p>`).join('')}</section>`).join('')}

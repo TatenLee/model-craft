@@ -1,7 +1,8 @@
+import {progressionByKey} from './book-progression.js';
 // Stable IDs are public routes and backup keys. Renaming a title must not rename its ID.
-const s=(id,title,kind,source,extra={})=>({id,title,kind,source,...extra});
-const l=(id,title,source,extra={})=>s(id,title,'lesson',source,extra);
-const u=(id,title,extra={})=>s(id,title,'unit',id,extra);
+const s=(id,title,kind,source)=>({id,title,kind,source});
+const l=(id,title,source)=>s(id,title,'lesson',source);
+const u=(id,title)=>s(id,title,'unit',id);
 const c=(id,title,problem,outcome,sections)=>({id,title,problem,outcome,sections});
 export const bookVolumes=[
  {id:'entry',title:'第一卷 · 按需补齐入门工具',question:'不会 Python，或者看到张量和导数就卡住，怎样继续？',before:'不要求机器学习经验。会写代码的人可以用例子检查后跳到第二卷。',outcome:'能运行、修改并解释一个小程序，理解数字、形状、误差和更新。',chapters:[
@@ -19,7 +20,7 @@ export const bookVolumes=[
   c('video','视频：时间不是多放几张图片','每帧都清楚，连起来却闪烁、身份漂移。','定义时序输入、训练采样和连续性评测。',[u('video','从图像到视频：时序结构与训练样本')]),
   c('multimodal','多模态：把接口真正接起来','图像和文字分别有效，接在一起却不互相理解。','追踪视觉塔、投影层、语言骨干及各自的训练状态。',[u('multimodal','图文对齐、融合与多模态指令')])
  ]},
- {id:'training',title:'第四卷 · 模型训练全生命周期',question:'得到一个基座以后，怎样继续补能力、学任务、学偏好与反馈？',before:'第二卷训练闭环；语言例子接第三卷第一章。不会强化学习时，先读本卷 5.3，再进入 4.6。',outcome:'对同一个模型保存阶段快照，比较基础能力、领域能力、任务行为与成本。',chapters:[
+ {id:'training',title:'第四卷 · 模型训练全生命周期',question:'得到一个基座以后，怎样继续补能力、学任务、学偏好与反馈？',before:'先能画出因果语言模型的输入、监督位置和更新链。强化学习是方向分支：先学策略、奖励与回报，再学采样与策略优化。',outcome:'对同一个模型保存阶段快照，比较基础能力、领域能力、任务行为与成本。',chapters:[
   c('overview','先看完整训练流程','只记缩写，无法判断一段训练到底改变了什么。','画出阶段图，并标出数据、目标、参数和评测。',[
    u('why-stages','为什么模型需要分阶段训练'),u('three-stages','预训练、中训练、后训练分别解决什么问题'),u('axes','阶段名称、学习方式和参数更新方式的区别'),u('stage-boundaries','不同项目为什么会采用不同的阶段划分')]),
   c('pretrain','预训练——建立模型的基础能力','没有可用能力时，首先要从大量样本中学到规律。','训练可复现的微型语言模型，并解释每个 batch 的监督来源。',[
@@ -27,7 +28,7 @@ export const bookVolumes=[
   c('midtrain','中训练——在基座上补充和强化能力','基座有一般能力，却不擅长当前领域或长输入。','设计持续训练的数据混合，并在保留能力与新增能力间取舍。',[
    u('capability-gap','为什么预训练结束后还需要继续训练'),u('cpt','持续预训练与领域适配'),u('context-extension','长上下文与专项能力强化'),u('forgetting','数据配比变化与能力遗忘'),u('stage-gate','怎样判断能否进入下一阶段'),u('midtrain-definitions','比较不同项目对“中训练”的定义')]),
   c('posttrain','后训练——让模型更符合任务和使用要求','能续写、能生成，不代表能可靠执行用户任务。','根据示范、偏好或可验证反馈选择训练路线，而非堆算法名字。',[
-   u('use-gap','基础能力与实际使用要求之间的差距'),u('post-routes','后训练的几条路线及其适用问题'),l('sft','SFT：通过示范学习任务与输出规范','w5-l1'),l('preference','偏好优化：学习什么结果更好','w5-l3'),u('reward','奖励模型：怎样获得评价信号'),u('rl-post','强化学习后训练：根据反馈优化行为',{requires:['training/methods/rl-basics']}),u('ppo-grpo','PPO、GRPO、RLHF、RLVR 的关系',{requires:['training/methods/rl-basics']}),u('distillation','蒸馏与能力整合：OPD、MOPD 等'),u('modality-post','图像、视频和具身模型的后训练'),u('post-eval','后训练后的评测、能力退化与失败分析')]),
+   u('use-gap','基础能力与实际使用要求之间的差距'),u('post-routes','后训练的几条路线及其适用问题'),l('sft','SFT：通过示范学习任务与输出规范','w5-l1'),l('preference','偏好优化：学习什么结果更好','w5-l3'),u('reward','奖励模型：怎样获得评价信号'),u('rl-post','强化学习后训练：根据反馈优化行为'),u('ppo-grpo','PPO、GRPO、RLHF、RLVR 的关系'),u('distillation','蒸馏与能力整合：OPD、MOPD 等'),u('modality-post','图像、视频和具身模型的后训练'),u('post-eval','后训练后的评测、能力退化与失败分析')]),
   c('methods','贯穿不同阶段的方法','阶段与技术混在一起，误以为用了 SFT 就不能用 LoRA。','分清训练目标、可更新参数与反馈来源，检查组合条件。',[
    u('freezing','全量更新、冻结与参数高效训练'),l('lora','LoRA、QLoRA 与适配器','w5-l2'),u('rl-basics','强化学习基础：策略、奖励、回报与探索'),u('combinations','不同方法能否组合、组合时检查什么')]),
   c('growth','贯穿实验——追踪一个模型的成长','单次最终分数无法解释能力从哪里来、在哪一步退化。','保留每阶段 checkpoint 与评测表，用证据选择下一次迭代。',[
@@ -47,7 +48,10 @@ export const bookVolumes=[
   c('portfolio','独立交付与迁移','自己跑通还不等于别人能够复现或信任。','提交复现说明、证据与答辩，把能力迁移到新任务。',[l('reproduce','让另一个人复现你的结果','w12-l1'),l('defend','用实验回答算法追问','w12-l2'),l('transfer','作品与迁移：公开工程、OmniFM 或古琴','w12-l3')])
  ]}
 ];
-export const bookSections=bookVolumes.flatMap((v,vi)=>v.chapters.flatMap((c,ci)=>c.sections.map((s,si)=>({...s,key:`${v.id}/${c.id}/${s.id}`,volumeId:v.id,chapterId:c.id,volumeTitle:v.title,chapterTitle:c.title,number:`${vi+1}.${ci+1}.${si+1}`,position:si,chapterPosition:ci}))));
+export const bookSections=bookVolumes.flatMap((v,vi)=>v.chapters.flatMap((c,ci)=>c.sections.map((s,si)=>{
+ const key=`${v.id}/${c.id}/${s.id}`;
+ return {...s,key,requires:progressionByKey.get(key).requires,volumeId:v.id,chapterId:c.id,volumeTitle:v.title,chapterTitle:c.title,number:`${vi+1}.${ci+1}.${si+1}`,position:si,chapterPosition:ci};
+})));
 export const bookSectionByKey=new Map(bookSections.map(s=>[s.key,s]));
 export const bookHref=key=>`#/book${key?'/'+key:''}`;
 export const lessonBookSection=id=>bookSections.find(s=>s.kind==='lesson'&&s.source===id);

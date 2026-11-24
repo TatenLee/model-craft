@@ -12,3 +12,9 @@
 .book-tree details[open]>summary::before{transform:rotate(45deg)}
 .book-tree summary>span{min-width:0;overflow-wrap:anywhere}
 .book-tree .book-parent-link{font-size:14px}
+.book-entry-actions{display:grid;gap:8px;flex-shrink:0}
+.book-prerequisites{line-height:1.9}
+.book-prerequisites ul{margin:4px 0 12px;padding-inline-start:24px}
+.book-route-list small{color:var(--muted);white-space:nowrap}
+.book-page details>summary{cursor:pointer}
+@media(max-width:1100px){.book-entry-actions{margin-top:14px;justify-content:start}}

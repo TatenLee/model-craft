@@ -31,7 +31,7 @@ export function sidebarModules(page,id,state,icon){
    if(projectId&&query&&!matchingProjects(query).includes(projectId))query='';
   }else if(id){const [volume,chapter]=id.split('/');expansion.set('book:'+volume,true);if(chapter)expansion.set('book:'+volume+'/'+chapter,true);}
  }
- return moduleHTML('practice',section==='practice',projectTree(projectId,state,page==='practice'),icon)+moduleHTML('book',section==='book',bookTree(page==='book'?id:'',state,{compact:true}),icon);
+ return moduleHTML('book',section==='book',bookTree(page==='book'?id:'',state,{compact:true}),icon)+moduleHTML('practice',section==='practice',projectTree(projectId,state,page==='practice'),icon);
 }
 export function bindSidebarNavigation({onStepJump=()=>{}}={}){
  const sidebar=document.getElementById('main-sidebar');if(!sidebar)return ()=>{};

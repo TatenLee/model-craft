@@ -4,6 +4,8 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {bookVolumes,bookSections,bookSectionByKey,bookProjectMap,bookMechanismMap,bookJourneyMap} from '../dist/data/book.js';
+import {readingOrder,mainReading,progressionByKey,volumeMilestones} from '../dist/data/book-progression.js';
+import {lessonBody} from '../dist/course-ui.js';
 import {bookUnits} from '../dist/data/book-units.js';
 import {bookExercises} from '../dist/data/book-practice.js';
 import {bookMaterial} from '../dist/book-content.js';
@@ -35,6 +37,29 @@ test('six volumes form a reachable, stable book with complete old-lesson and lif
   for(const req of s.requires||[])assert.ok(bookSectionByKey.has(req));
   if(s.kind==='unit'){assert.ok(m.terms.length>=2);assert.ok(m.steps.length>=3);assert.ok(m.worked.length>=3);assert.ok(m.practice.action&&m.practice.expected&&m.practice.trouble);assert.ok(m.sources.every(s=>s.url.startsWith('https://')));}
  }
+});
+
+test('recommended traversal covers the unchanged catalog, puts prerequisites first, and offers a self-contained main route',()=>{
+ const seen=new Set(),mainKeys=new Set(mainReading.map(step=>step.key));
+ for(const step of readingOrder){
+  assert.ok(!seen.has(step.key),step.key);
+  assert.ok(step.distinction&&step.check,step.key);
+  for(const dependency of step.requires){
+   assert.ok(seen.has(dependency),`${dependency} must be taught before ${step.key}`);
+   if(mainKeys.has(step.key))assert.ok(mainKeys.has(dependency),`${step.key} relies on an optional detour`);
+  }
+  seen.add(step.key);
+ }
+ assert.deepEqual(seen,new Set(bookSections.map(s=>s.key)));
+ for(const v of bookVolumes)assert.ok(volumeMilestones[v.id].gate&&volumeMilestones[v.id].pass);
+ assert.ok(progressionByKey.get('training/methods/rl-basics').index<progressionByKey.get('training/posttrain/preference').index);
+ assert.ok(progressionByKey.get('training/growth/growth-base').index<progressionByKey.get('training/midtrain/cpt').index);
+ const state=createState();
+ const handoff=JSDOM.fragment(bookPage('models/language/decoder',state,exercises,()=>'')).querySelector('#book-handoff');
+ assert.ok(handoff.querySelector('a[href="#/book/models/vision/tower"]'),'read all');
+ assert.ok(handoff.querySelector('a[href="#/book/training/overview/why-stages"]'),'skip optional branches');
+ assert.match(lessonBody(lessons[0],lessons),/先确认起点/);
+ assert.doesNotMatch(bookPage('models/language/decoder',state,exercises,()=>''),/lesson-start callout/);
 });
 
 test('every volume, chapter and section renders content, and all book links resolve',()=>{

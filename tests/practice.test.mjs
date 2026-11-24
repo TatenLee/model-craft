@@ -59,7 +59,17 @@ test('project-first app navigates every project, saves evidence, invalidates edi
  const nav=async id=>{w.location.hash='#/practice'+(id?'/'+id:'');await tick();assert.deepEqual(errors,[]);};
  assert.match(node('h1').textContent,/先做一个模型/);assert.equal(w.document.querySelectorAll('.practice-project-card').length,14);
  assert.equal(w.document.querySelector('.book-legacy-context'),null);assert.match(node('#journey-overall-count').textContent,/0 \/ 61/);
- for(const p of practiceProjects){await nav(p.id);assert.equal(node('h1').textContent,p.title);assert.equal(w.document.querySelectorAll('[data-practice-note]').length,p.steps.length);}
+ for(const p of practiceProjects){
+  await nav(p.id);assert.equal(node('h1').textContent,p.title);
+  assert.equal(w.document.querySelectorAll('[data-practice-note]').length,p.steps.length);
+  const figures=[...w.document.querySelectorAll('.practice-blueprint figure')];
+  assert.equal(figures.length,3,p.id);
+  for(const figure of figures)assert.ok(figure.querySelectorAll('li').length>=2,`${p.id}: empty diagram`);
+  for(const [i] of p.steps.entries()){
+   const purpose=node(`#practice-step-${i} .practice-reason`).lastChild;
+   assert.equal(purpose.nodeType,w.Node.TEXT_NODE);assert.ok(purpose.textContent.trim(),`${p.id} step ${i+1}: missing purpose`);
+  }
+ }
  await nav('vision-baseline');assert.equal(node('#code-editor').dataset.exercise,'practice-class-recall');const note=node('#practice-note-0'),box=node('[data-practice-review="0"]');assert.ok(box.disabled);
  note.value='我先固定划分并检查了真实样本与标签，再对比训练和验证曲线；目前还不能确认效果，需要在自己的实验目录保存原始报告与复现命令。';note.dispatchEvent(new w.Event('input',{bubbles:true}));assert.equal(box.disabled,false);
  box.click();assert.deepEqual(saved().practice.projects['vision-baseline'].reviewed,[0]);assert.match(node('#journey-overall-count').textContent,/1 \/ 61/);assert.deepEqual(saved().codeResults,{});
