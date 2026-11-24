@@ -10,13 +10,14 @@ import {lessonBody} from './course-ui.js';
 import {days} from './data/days.js';
 import {journeyStages} from './data/journey.js';
 import {escapeHTML as e} from './state.js';
-const link=(key,title,cls='')=>`<a class="${cls}" href="${bookHref(key)}">${e(title)}</a>`;
+const link=(key,title,cls='',current=false)=>`<a class="${cls}" href="${bookHref(key)}" ${current?'aria-current="page"':''}>${e(title)}</a>`;
 const sourceLinks=sources=>(sources||[]).map(s=>`<a href="${e(s.url)}" target="_blank" rel="noopener noreferrer">${e(s.label)} ↗</a>`).join('');
 const heading=(title,text)=>`<div class="page-heading"><div><h1>${e(title)}</h1><p>${e(text)}</p></div></div>`;
 function mapLinks(links){return (links||[]).map(a=>Array.isArray(a)?`<a class="btn btn-small" href="#/${a[1]}${a[2]?'/'+a[2]:''}">${e(a[0])} →</a>`:`<a class="btn btn-small" href="${e(a.href)}">${e(a.label)} →</a>`).join('');}
 function canonicalLinks(html){return html.replace(/href="#\/lesson\/(w\d+-l\d+)"/g,(_,id)=>`href="${bookHref(lessonBookSection(id)?.key)}"`);}
 export function bookTree(key,state,{compact=false}={}){
- const ids=key.split('/');return `<nav class="book-tree ${compact?'book-tree-compact':''}" aria-label="${compact?'侧栏书籍目录':'全书分层目录'}">${bookVolumes.map((v,vi)=>`<details ${(!compact||v.id===ids[0])?'open':''}><summary>${e(v.title)}</summary>${link(v.id,'第 '+(vi+1)+' 卷导读','book-parent-link')}${v.chapters.map((c,ci)=>`<details ${v.id===ids[0]&&c.id===ids[1]?'open':''}><summary>${ci+1}. ${e(c.title)}</summary>${link(v.id+'/'+c.id,'本章导读与综合练习','book-parent-link')}${c.sections.map((s,si)=>{const k=`${v.id}/${c.id}/${s.id}`;return `<a href="${bookHref(k)}" ${k===key?'aria-current="page"':''}><span>${vi+1}.${ci+1}.${si+1}</span><span>${e(s.title)}${state.book.records[k]?.readAt?' · 已读':''}</span></a>`;}).join('')}</details>`).join('')}</details>`).join('')}</nav>`;
+ const ids=key.split('/');
+ return `<nav class="book-tree ${compact?'book-tree-compact sidebar-tree':''}" aria-label="${compact?'侧栏书籍目录':'全书分层目录'}">${bookVolumes.map((v,vi)=>`<details data-sidebar-node="book:${v.id}" ${(!compact||v.id===ids[0])?'open':''}><summary><span>${e(v.title)}</span></summary><div class="tree-children">${link(v.id,'第 '+(vi+1)+' 卷导读','book-parent-link',key===v.id)}${v.chapters.map((c,ci)=>`<details data-sidebar-node="book:${v.id}/${c.id}" ${v.id===ids[0]&&c.id===ids[1]?'open':''}><summary><span>${ci+1}. ${e(c.title)}</span></summary><div class="tree-children">${link(v.id+'/'+c.id,'本章导读与综合练习','book-parent-link',key===v.id+'/'+c.id)}${c.sections.map((s,si)=>{const k=`${v.id}/${c.id}/${s.id}`;return `<a href="${bookHref(k)}" ${k===key?'aria-current="page"':''}><span>${vi+1}.${ci+1}.${si+1}</span><span>${e(s.title)}${state.book.records[k]?.readAt?' · 已读':''}</span></a>`;}).join('')}</div></details>`).join('')}</div></details>`).join('')}</nav>`;
 }
 function resumeCard(state){const s=readingResume(state),last=!!state.book.lastRead;return `<section class="panel panel-pad book-resume"><div><span class="eyebrow">${last?'继续上次的位置':'从训练闭环开始'}</span><h2>${e(s.title)}</h2><p>${e(s.volumeTitle)} / ${e(s.chapterTitle)}</p><p class="small muted">自动记住当前小节与阅读段落。已读、理解题、当前代码和实验观察分别记录；进度保存在本机，可导出备份。</p></div>${link(s.key,last?'继续阅读 →':'开始学习 →','btn btn-primary')}</section>`;}
 export function bookPage(key,state,exercises,editor){

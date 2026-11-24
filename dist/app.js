@@ -1,3 +1,4 @@
+import {sidebarModules,bindSidebarNavigation} from './sidebar-nav.js';
 import {practiceCoding} from './data/practice-coding.js';
 import {practicePage,bindPractice,practiceCodingPanel} from './practice-ui.js';
 import {practiceProjects} from './data/practice-projects.js';
@@ -5,7 +6,7 @@ import {conceptGuideHTML,conceptExamplePage} from './concept-guide-ui.js';
 import {conceptExamples} from './data/concept-examples.js';
 import {bookSections,bookSectionByKey} from './data/book.js';
 import {bookExercises} from './data/book-practice.js';
-import {bookPage,bookTree,bindBook,bookCompletion,bookResourceContext} from './book-ui.js';
+import {bookPage,bindBook,bookCompletion,bookResourceContext} from './book-ui.js';
 import './preferences.js';
 import {foundations} from './data/foundations.js';
 import {trackName} from './data/learning-paths.js';
@@ -39,7 +40,7 @@ const allExercises=[...practiceCoding,...conceptExamples,...exercises,...lessonE
 const catalog={weeks,lessons,categories,concepts,questions,exercises:allExercises,days,projectStages,workshops,portfolioRubric,architectureLessons};
 let state;try{const raw=localStorage.getItem(STORAGE_KEY);state=raw?normalizeState(JSON.parse(raw),catalog):createState();}catch{state=createState();}
 let conceptSearch='',conceptCategory='all',bookmarksOnly=false,quiz=null,quizMode='week-1',selectedAnswer=null;
-let cleanupPractice=null,cleanupBook=null,cleanupLearning=null,cleanupJourney=null,cleanupArchitecture=null,cleanupGuide=null,cleanupLab=null,runner=null,runnerTimeout=null,runnerBusy=false,runResults={},hintCounts={},menuOpen=false;
+let cleanupSidebar=null,cleanupPractice=null,cleanupBook=null,cleanupLearning=null,cleanupJourney=null,cleanupArchitecture=null,cleanupGuide=null,cleanupLab=null,runner=null,runnerTimeout=null,runnerBusy=false,runResults={},hintCounts={},menuOpen=false;
 const root=document.getElementById('app');
 const paths={
  home:'M3 10l9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z',
@@ -57,7 +58,7 @@ const paths={
  play:'M8 4l12 8-12 8z',plus:'M12 5v14M5 12h14',menu:'M4 6h16M4 12h16M4 18h16',back:'M19 12H5M10 7l-5 5 5 5',link:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2',shield:'M12 3l8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM8 12l3 3 5-6'
 };
 const icon=(name,cls='')=>`<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]||paths.layers}"/></svg>`;
-const navs=[['practice','layers','实战路线 · 从项目开始'],['book','book','书籍目录与继续阅读'],['foundations','book','公共基础'],['paths','map','各方向实战状态'],['journey','map','机器人案例'],['blueprint','layers','工程拼装图'],['library','book','按需参考库'],['guide','map','岗位能力图'],['dashboard','home','学习工作台'],['course','book','原周课与每日练习'],['projects','layers','项目实战'],['architectures','map','模型结构'],['concepts','book','概念词典'],['labs','flask','交互实验室'],['code','code','代码练习'],['assessment','exam','测验与复习'],['notebook','note','实验手记']];
+const navs=[['practice','layers','实战路线'],['book','book','书籍目录'],['foundations','book','公共基础'],['paths','map','各方向实战状态'],['journey','map','机器人案例'],['blueprint','layers','工程拼装图'],['library','book','按需参考库'],['guide','map','岗位能力图'],['dashboard','home','学习工作台'],['course','book','原周课与每日练习'],['projects','layers','项目实战'],['architectures','map','模型结构'],['concepts','book','概念词典'],['labs','flask','交互实验室'],['code','code','代码练习'],['assessment','exam','测验与复习'],['notebook','note','实验手记']];
 const route=()=>{const parts=location.hash.replace(/^#\/?/,'').split('/');return {page:parts[0]||'practice',id:decodeURIComponent(parts.slice(1).join('/')||'')};};
 const href=(page,id='')=>`#/${page}${id?'/'+encodeURIComponent(id):''}`;
 const completedDays=()=>days.filter(d=>dayStatus(d,state,allExercises.find(ex=>ex.id===d.exerciseId)).completed).length;
@@ -78,17 +79,17 @@ function shell(page,content){
  <aside id="main-sidebar" class="sidebar ${menuOpen?'open':''}" aria-label="主要导航">
  <div class="sidebar-heading"><a class="brand" href="#/practice" aria-label="Model Craft 学习首页"><span class="brand-mark">m<span>c</span></span><div class="brand-copy"><div class="brand-name">Model Craft</div><div class="brand-subtitle">大模型学习实验室</div></div></a><button class="sidebar-close" data-action="menu" aria-label="关闭导航">${icon('close')}</button></div>
  <button class="sidebar-toggle" data-action="sidebar-toggle" aria-controls="main-sidebar" aria-expanded="true" aria-label="收起侧栏">${icon('back')}<span class="sidebar-toggle-label">收起侧栏</span></button>
- <div class="nav-label">先做项目 · 遇到问题再查资料</div><nav class="nav">${navs.filter(n=>['practice','book','library','notebook'].includes(n[0])).map(navLink).join('')}<details class="nav-reference" ${!['practice','book','learn','library','notebook','settings'].includes(active)?'open':''}><summary title="展开按需参考资料">按需参考资料</summary>${navs.filter(n=>!['practice','book','library','notebook'].includes(n[0])).map(navLink).join('')}</details></nav><details class="book-sidebar" ${['book','learn'].includes(active)?'open':''}><summary>卷 · 章 · 节</summary>${bookTree(route().page==='book'?route().id:'',state,{compact:true})}</details>
+ <div class="nav-label">学习模块</div><nav class="nav" aria-label="学习模块与资料">${sidebarModules(route().page,route().id,state,icon)}<div class="sidebar-tools">${navs.filter(n=>['library','notebook'].includes(n[0])).map(navLink).join('')}</div><details class="nav-reference" ${!['practice','book','learn','library','notebook','settings'].includes(active)?'open':''}><summary title="展开按需参考资料">按需参考资料</summary>${navs.filter(n=>!['practice','book','library','notebook'].includes(n[0])).map(navLink).join('')}</details></nav>
  <div class="sidebar-bottom"><div class="journey-mini"><div class="between"><span class="small">${progress.label}</span><span class="small muted" id="journey-overall-percent">${progress.percent}%</span></div><div class="progress-track" id="journey-overall-bar" role="progressbar" aria-label="${progress.label}" aria-valuenow="${progress.percent}" aria-valuemin="0" aria-valuemax="100"><div class="progress-fill" style="width:${progress.percent}%"></div></div><p class="small muted" id="journey-overall-count" style="margin-top:8px">${progress.count} / ${progress.total} ${progress.suffix}</p></div><a class="nav-link ${active==='settings'?'active':''}" href="#/settings" title="进度备份与设置" aria-label="进度备份与设置">${icon('settings')}<span class="nav-text">进度备份与设置</span></a><div class="user-row"><div class="avatar">M</div><div class="user-copy"><p>本机学习空间</p><small class="muted" id="learning-interest-label">${e(trackName(state.learner.track))}</small></div></div></div>
  </aside><div class="main-wrap"><header class="topbar"><div class="topbar-left"><button class="mobile-menu" data-action="menu" aria-label="打开导航" aria-controls="main-sidebar" aria-expanded="${menuOpen}">${icon('menu')}</button><div class="breadcrumb"><span>我的学习空间</span><span>/</span><strong>${title}</strong></div></div><div class="topbar-right"><button class="top-search" data-action="search" aria-label="搜索概念">${icon('search')}<span>搜索一个概念…</span><kbd>⌘ K</kbd></button><label class="theme-control"><span class="sr-only">外观模式</span><select data-ui-theme aria-label="外观模式"><option value="system">跟随系统</option><option value="light">浅色模式</option><option value="dark">暗色模式</option></select></label><span class="local-tag"><i class="status-dot"></i>本机保存</span></div></header><main class="content" id="main" tabindex="-1">${content}<footer class="footer-note"><span class="row">${icon('shield')}记录真实理解，让每次实验都有依据。</span><span>MODEL CRAFT · LEARN BY BUILDING</span></footer></main></div></div>`;
 }
 
-function toggleMenu(){
+function toggleMenu({focus=true}={}){
  menuOpen=!menuOpen;
  document.querySelector('.sidebar')?.classList.toggle('open',menuOpen);
  document.querySelector('.sidebar-backdrop')?.classList.toggle('hidden',!menuOpen);
  const button=document.querySelector('.mobile-menu');button?.setAttribute('aria-expanded',String(menuOpen));button?.setAttribute('aria-label',menuOpen?'关闭导航':'打开导航');
- if(menuOpen)document.querySelector('.sidebar-close')?.focus();else button?.focus();
+ if(focus){if(menuOpen)document.querySelector('.sidebar-close')?.focus();else button?.focus();}
 }
 function dashboard(){return dailyDashboard(state,allExercises,questions).replace('<div class="daily-weeks">','<section class="panel panel-pad project-entry"><span class="eyebrow">新 · 项目实战</span><h2>带着一个小模型，逐步走向 OmniFM</h2><p>P01–P10 是完整作品，M01–M16 是按需机制练习。从能力地图找到项目的位置，再进入带练。</p><div class="row wrap"><a class="btn btn-primary" href="#/guide">先看学习导览 →</a><a class="btn" href="#/projects">进入项目实战</a></div></section><div class="daily-weeks">');}
 function currentProject(){const r=route();return projectStages.find(s=>r.page==='projects'?s.id===r.id:r.page==='code'&&s.exercise.id===r.id);}
@@ -149,7 +150,7 @@ function settingsPage(){const terms=['预训练','后训练','PT','AR','SFT','Lo
 function notFound(){return '<section class="panel empty"><h3>没有找到这一页</h3><p>课程可能已经更新，请从学习路线继续。</p><a class="btn" href="#/book">返回学习首页</a></section>';}
 
 function render({keepScroll=false}={}){
- cleanupPractice?.();cleanupPractice=null;cleanupBook?.();cleanupBook=null;cleanupLearning?.();cleanupLearning=null;cleanupLab?.();cleanupLab=null;cleanupGuide?.();cleanupGuide=null;cleanupArchitecture?.();cleanupArchitecture=null;cleanupJourney?.();cleanupJourney=null;const r=route();
+ cleanupSidebar?.();cleanupSidebar=null;cleanupPractice?.();cleanupPractice=null;cleanupBook?.();cleanupBook=null;cleanupLearning?.();cleanupLearning=null;cleanupLab?.();cleanupLab=null;cleanupGuide?.();cleanupGuide=null;cleanupArchitecture?.();cleanupArchitecture=null;cleanupJourney?.();cleanupJourney=null;const r=route();
  if(runnerBusy)stopRunner();
  const pages={practice:()=>practicePage(r.id,state,dayEditor),book:()=>bookPage(r.id,state,allExercises,dayEditor),learn:()=>bookPage('',state,allExercises,dayEditor),foundations:()=>foundationPage(r.id,state,allExercises,dayEditor),paths:()=>pathsPage(r.id,state),journey:()=>journeyPage(r.id,state,allExercises,dayEditor),blueprint:()=>blueprintPage(r.id),library:libraryPage,architectures:()=>architecturePage(r.id,state),guide:()=>guidePage(r.id,state),dashboard,projects:()=>projectsPage(r.id),course:()=>coursePage(r.id),day:()=>dayPage(r.id),lesson:()=>lessonPage(r.id),concepts:()=>conceptsPage(r.id),labs:()=>labsPage(r.id),code:()=>codePage(r.id),assessment:assessmentPage,notebook:notebookPage,settings:settingsPage};
  const scroll=window.scrollY;const legacyContext=resourceContext(r.page,r.id);root.innerHTML=shell(r.page,bookResourceContext(r.page,r.id)+(legacyContext&&!['practice','book','learn'].includes(r.page)?`<details class="book-legacy-context"><summary>查看这份材料在可选机器人案例中的用法</summary>${legacyContext}</details>`:'')+(pages[r.page]||notFound)());
@@ -160,6 +161,7 @@ function render({keepScroll=false}={}){
  if(['foundations','paths','settings'].includes(r.page))cleanupLearning=bindLearning(r.page,r.id,state,allExercises,save);
  if(r.page==='code'&&r.id.startsWith('journey-'))cleanupJourney=bindJourney('journey',journeyStages.find(s=>s.exerciseId===r.id)?.id,state,allExercises,save);
  window.ModelCraftUI.refresh();
+ cleanupSidebar=bindSidebarNavigation({onStepJump:()=>{if(menuOpen)toggleMenu({focus:false});}});
  bindInputs();if(keepScroll)window.scrollTo(0,scroll);else window.scrollTo(0,0);
  if(r.page==='practice')cleanupPractice=bindPractice(r.id,state,save);
  if(r.page==='book')cleanupBook=bindBook(r.id,state,allExercises,save,{restore:!keepScroll});

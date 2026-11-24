@@ -1,0 +1,51 @@
+/* Module headers stay visible in the icon rail; only their own contents collapse. */
+:root{--sidebar-expanded-width:300px}
+.sidebar{width:var(--sidebar-expanded-width);padding-inline:16px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.sidebar .nav-label{font-size:14px;letter-spacing:.04em;margin:0 10px 12px}
+.sidebar .nav-link{font-size:14px}
+.sidebar-module{min-width:0}
+.sidebar-module-heading{display:grid;grid-template-columns:minmax(0,1fr) 32px;align-items:center;gap:2px}
+.sidebar .sidebar-module-link{font-size:16px;font-weight:650;padding:11px 10px;gap:10px}
+.sidebar-module-link.active::after{display:none}
+.sidebar-module-toggle{width:32px;min-height:40px;display:grid;place-items:center;border:0;border-radius:6px;background:transparent;color:var(--muted);cursor:pointer}
+.sidebar-module-toggle:hover{background:var(--green-soft);color:var(--green)}
+.sidebar-chevron{width:7px;height:7px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg)}
+.sidebar-module-toggle[aria-expanded=true] .sidebar-chevron{transform:rotate(45deg)}
+.sidebar-module-body{margin:8px 0 14px 20px;padding-inline-start:10px;border-inline-start:1px solid var(--line);min-width:0}
+.sidebar [hidden]{display:none!important}
+.sidebar-tree{font-size:14px;line-height:1.65}
+.sidebar-tree details{margin:4px 0}
+.sidebar-tree summary{display:flex;align-items:flex-start;gap:9px;list-style:none;padding:8px 4px;color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;border-radius:5px}
+.sidebar-tree summary:hover{background:var(--surface-soft,var(--green-soft))}
+.sidebar-tree summary::-webkit-details-marker{display:none}
+.sidebar-tree summary::marker{content:""}
+.sidebar-tree summary::before{content:"";width:6px;height:6px;flex:none;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);margin-top:8px}
+.sidebar-tree details[open]>summary::before{transform:rotate(45deg)}
+.sidebar-tree summary>span{min-width:0;overflow-wrap:anywhere}
+.sidebar-tree .tree-children{margin-inline-start:8px;padding-inline-start:12px;border-inline-start:1px solid var(--line)}
+.sidebar-tree a,.sidebar-project-steps button{display:flex;align-items:flex-start;gap:7px;padding:8px 5px;font-size:14px;line-height:1.65;border-radius:6px;color:var(--muted);overflow-wrap:anywhere;min-width:0}
+.sidebar-tree a>span:last-child,.sidebar-project-steps button>span:last-child{min-width:0}
+.sidebar-tree .tree-number,.sidebar-tree a>span:first-child{flex-shrink:0;font-variant-numeric:tabular-nums}
+.sidebar-tree a:hover,.sidebar-tree a[aria-current=page],.sidebar-project-steps button:hover{background:var(--green-soft);color:var(--green)}
+.sidebar-tree a[aria-current=page]{font-weight:650;box-shadow:inset 2px 0 var(--green)}
+.sidebar-project-steps{margin-block:4px 10px}
+.sidebar-project-steps button{width:100%;text-align:left;border:0;background:transparent;cursor:pointer;font-family:inherit}
+.sidebar-search-label{display:block;font-size:14px;color:var(--muted);margin:2px 0 6px}
+.sidebar-search{display:flex;gap:4px;align-items:center}
+.sidebar-search input{width:100%;min-width:0;min-height:38px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px}
+.sidebar-search button{border:0;background:transparent;color:var(--green);padding:6px 2px;font-size:14px;white-space:nowrap;cursor:pointer}
+.sidebar-filter-count,.sidebar-no-results{font-size:14px;color:var(--muted);line-height:1.7;margin:8px 0}
+.sidebar-tools{border-top:1px solid var(--line);padding-top:12px;margin-top:10px}
+.sidebar .nav-reference{margin-top:8px}
+.sidebar .nav-reference>summary{font-size:14px}
+.sidebar-module button:focus-visible,.sidebar-tree summary:focus-visible,.sidebar-tree a:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media(min-width:641px){
+ .layout{grid-template-columns:var(--sidebar-expanded-width) minmax(0,1fr)}
+ html[data-sidebar=collapsed] .sidebar-module-body,html[data-sidebar=collapsed] .sidebar-module-toggle{display:none}
+ html[data-sidebar=collapsed] .sidebar-module-heading{display:block}
+ html[data-sidebar=collapsed] .sidebar .sidebar-module-link{justify-content:center;padding:12px 8px}
+}
+@media(min-width:641px) and (max-width:1000px){:root{--sidebar-expanded-width:264px}}
+@media(max-width:640px){.sidebar{width:min(320px,calc(100vw - 36px))}.sidebar-module-heading{grid-template-columns:minmax(0,1fr) 40px}.sidebar-module-toggle{width:40px;min-height:44px}}
+
+@media(max-width:640px){html[data-sidebar=collapsed] .sidebar .nav-reference>summary{font-size:14px;text-align:left}html[data-sidebar=collapsed] .sidebar .nav-reference>summary::after{display:none}}
